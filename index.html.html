@@ -1,0 +1,2684 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Nail Studio</title>
+<!-- PWA meta tags -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nail Studio">
+<meta name="theme-color" content="#2A0A1E">
+<!-- Manifest inline via blob -->
+<script>
+(function(){
+  var manifest={
+    name:"Nail Studio 💅",
+    short_name:"Nail Studio",
+    description:"Control profesional de tu negocio de uñas",
+    start_url:".",
+    display:"standalone",
+    background_color:"#2A0A1E",
+    theme_color:"#2A0A1E",
+    orientation:"portrait",
+    icons:[
+      {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232A0A1E'/><text y='70' x='50' text-anchor='middle' font-size='60'>💅</text></svg>",sizes:"192x192",type:"image/svg+xml"},
+      {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232A0A1E'/><text y='70' x='50' text-anchor='middle' font-size='60'>💅</text></svg>",sizes:"512x512",type:"image/svg+xml"}
+    ]
+  };
+  var blob=new Blob([JSON.stringify(manifest)],{type:"application/json"});
+  var url=URL.createObjectURL(blob);
+  var link=document.createElement("link");
+  link.rel="manifest";link.href=url;
+  document.head.appendChild(link);
+})();
+</script>
+<style>
+:root{
+  --rose:#C9637A;--rose-l:#E8A0B0;--rose-d:#A04060;
+  --mauve:#9B6B8A;--blush:#F5E6EA;
+  --bg:#FAF7F8;--card:#FFFFFF;--text:#2A1F24;--muted:#9B8990;
+  --success:#5BAD7F;--danger:#D95555;--warn:#D98A3A;
+  --shadow:0 2px 16px rgba(160,64,96,0.08);--radius:18px;
+  --border:#F0E8EC;--input-bg:#FAF7F8;
+}
+body.dark{
+  --bg:#140810;--card:#1E1018;--text:#F0E4EA;--muted:#8A6878;
+  --blush:#2A1422;--border:#3A1E2A;--input-bg:#241420;
+  --shadow:0 2px 16px rgba(0,0,0,0.4);
+}
+/* Dark mode específicos */
+body.dark .app-header{background:var(--card);border-bottom-color:var(--border);}
+body.dark .tabs{background:linear-gradient(160deg,#0A0308,#2A0A1E);}
+body.dark .modal-sheet{background:#1E1018;}
+body.dark .input-group input,body.dark .input-group select,body.dark .input-group textarea,body.dark textarea{background:var(--input-bg);color:var(--text);border-color:var(--border);}
+body.dark .hora-picker{background:var(--input-bg);border-color:var(--border);}
+body.dark .extras-box{background:#2A1422;border-color:#3A1E2A;}
+body.dark .form-card,body.dark .featured-card,body.dark .summary-card{background:var(--card);}
+body.dark .precio-row{border-bottom-color:var(--border);}
+body.dark .precio-inp{background:var(--input-bg);color:var(--rose);border-color:var(--border);}
+body.dark .dia-row{background:var(--card);}
+body.dark .dia-row.hoy{box-shadow:0 0 0 2px var(--rose);}
+body.dark .dia-fecha{border-right-color:var(--border);}
+body.dark .turno-card{background:var(--card);}
+body.dark .history-item{background:var(--card);}
+body.dark .clienta-card{background:var(--card);}
+body.dark .ficha-nota{background:#2A1422;}
+body.dark .graph-card{background:var(--card);}
+body.dark .list-item,body.dark .stock-item{background:var(--card);}
+body.dark .total-row{background:var(--blush);}
+body.dark .stat-card,body.dark .stat-big,body.dark .stat-mini{background:var(--card);}
+body.dark .senia-info{background:#1A2E1E;color:#7EC89A;}
+body.dark .prox-turno-badge{background:#1A2E1E;color:#7EC89A;}
+body.dark .summary-row{border-bottom-color:var(--border);}
+body.dark .top-svc-item{border-bottom-color:var(--border);}
+body.dark .warn-alert{background:#2A1E0A;border-color:#5A3A0A;}
+
+/* ── GALERÍA ── */
+.galeria-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-bottom:14px;}
+.galeria-thumb{aspect-ratio:1;object-fit:cover;border-radius:8px;cursor:pointer;transition:transform 0.15s;width:100%;}
+.galeria-thumb:active{transform:scale(0.95);}
+.galeria-add{aspect-ratio:1;border-radius:8px;border:2px dashed var(--rose-l);background:var(--blush);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:4px;transition:all 0.15s;}
+.galeria-add:active{background:var(--rose);border-color:var(--rose);}
+.galeria-add-icon{font-size:24px;}
+.galeria-add-txt{font-size:9px;font-weight:700;color:var(--rose);text-transform:uppercase;letter-spacing:0.5px;}
+body.dark .galeria-add{background:var(--blush);border-color:#5A2A40;}
+/* Lightbox */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.25s;}
+.lightbox.show{opacity:1;pointer-events:all;}
+.lightbox img{max-width:96vw;max-height:78vh;border-radius:12px;object-fit:contain;}
+.lightbox-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.15);border:none;color:white;font-size:22px;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.lightbox-del{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);background:var(--danger);color:white;border:none;border-radius:12px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;}
+.lightbox-date{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);font-size:12px;color:rgba(255,255,255,0.5);white-space:nowrap;}
+/* Dark toggle btn */
+.dark-toggle{width:36px;height:36px;border-radius:50%;border:none;background:var(--blush);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;margin-left:8px;}
+body.dark .dark-toggle{background:#2A1422;}
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);padding-bottom:100px;overflow-x:hidden;}
+#splash{position:fixed;inset:0;background:linear-gradient(160deg,#2A0A1E,#5C1A3A,#2A0A1E);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.7s ease;}
+#splash.hide{opacity:0;pointer-events:none;}
+.splash-emoji{font-size:72px;animation:floatNail 1.6s ease-in-out infinite alternate;}
+@keyframes floatNail{from{transform:translateY(0) rotate(-6deg);}to{transform:translateY(-16px) rotate(6deg);}}
+.splash-title{font-size:34px;font-weight:900;font-style:italic;color:#fff;margin-top:22px;}
+.splash-sub{font-size:11px;color:rgba(255,255,255,0.45);letter-spacing:3px;text-transform:uppercase;margin-top:8px;}
+.splash-bar-bg{width:140px;height:3px;background:rgba(255,255,255,0.12);border-radius:2px;margin-top:44px;overflow:hidden;}
+.splash-bar-fill{height:100%;background:linear-gradient(90deg,var(--rose-l),#fff);border-radius:2px;animation:loadBar 1.9s ease forwards;}
+@keyframes loadBar{from{width:0}to{width:100%}}
+.app-header{padding:20px 20px 16px;background:var(--card);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #F0E8EC;position:sticky;top:0;z-index:100;box-shadow:0 1px 8px rgba(160,64,96,0.06);}
+.brand h1{font-size:23px;font-weight:900;font-style:italic;}
+.brand p{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--rose);font-weight:700;margin-top:2px;}
+.header-icon{width:40px;height:40px;background:var(--blush);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(160deg,#2A0A1E 0%,#5C1A3A 100%);display:flex;align-items:center;z-index:200;box-shadow:0 -2px 30px rgba(42,10,30,0.45);padding:8px 6px 12px;gap:2px;}
+.tab-wrap{flex:1;position:relative;display:flex;justify-content:center;}
+.tab-btn{flex:1;padding:8px 4px 6px;border:none;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:rgba(255,255,255,0.4);cursor:pointer;gap:4px;text-transform:uppercase;letter-spacing:0.5px;border-radius:14px;transition:all 0.2s;}
+.tab-btn.active{color:#fff;background:rgba(255,255,255,0.13);}
+.tab-icon{font-size:22px;line-height:1;transition:transform 0.2s;}
+.tab-btn.active .tab-icon{transform:scale(1.15);}
+.tab-dot{display:none;}
+.notif-dot{position:absolute;top:4px;right:6px;width:7px;height:7px;background:#FF6B6B;border-radius:50%;border:2px solid #3D0A20;display:none;}
+.page{display:none;}
+.page.active{display:block;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px 16px 10px;}
+.stat-card{background:var(--card);padding:14px 8px;border-radius:var(--radius);text-align:center;box-shadow:var(--shadow);}
+.stat-card .lbl{font-size:9px;text-transform:uppercase;color:var(--rose);font-weight:700;margin-bottom:4px;}
+.stat-card .val{font-size:13px;font-weight:800;}
+.featured-card{margin:0 16px 16px;background:var(--card);padding:20px;border-radius:20px;box-shadow:var(--shadow);}
+.feat-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;}
+.feat-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);}
+.feat-pct{font-size:28px;font-weight:900;color:var(--rose);font-style:italic;}
+.prog-bg{background:var(--blush);border-radius:6px;height:8px;overflow:hidden;margin-bottom:10px;}
+.prog-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--rose-d),var(--rose-l));transition:width 0.8s ease;}
+.feat-sub{font-size:12px;color:var(--muted);text-align:center;}
+.section-title{font-size:18px;font-weight:900;font-style:italic;margin:18px 16px 10px;display:flex;align-items:center;gap:8px;}
+.badge{background:var(--rose);color:white;border-radius:20px;padding:2px 9px;font-size:10px;font-weight:700;margin-left:auto;font-style:normal;}
+.summary-card{background:var(--card);border-radius:var(--radius);padding:4px 20px;box-shadow:var(--shadow);margin:0 16px 16px;}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid #F5EEF1;}
+.summary-row:last-child{border-bottom:none;}
+.summary-label{color:var(--muted);font-size:13px;}
+.summary-val{font-weight:800;font-size:14px;}
+
+/* ── AGENDA VERTICAL ── */
+.week-header{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 10px;}
+.week-title{font-size:15px;font-weight:800;color:var(--text);text-align:center;flex:1;}
+.week-nav-btn{background:var(--blush);border:none;border-radius:12px;width:36px;height:36px;font-size:20px;cursor:pointer;color:var(--rose-d);font-weight:900;display:flex;align-items:center;justify-content:center;}
+.agenda-swipe{overflow:hidden;touch-action:pan-y;}
+.agenda-week{display:flex;flex-direction:column;gap:0;padding:0 16px;transition:transform 0.3s cubic-bezier(.4,0,.2,1);}
+.dia-row{display:flex;align-items:stretch;min-height:64px;border-radius:16px;margin-bottom:8px;background:var(--card);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;}
+.dia-row:active{transform:scale(0.98);}
+.dia-row.hoy{box-shadow:0 0 0 2px var(--rose),var(--shadow);}
+.dia-row.selected{background:linear-gradient(135deg,var(--rose-d),var(--mauve));color:white;}
+.dia-fecha{width:64px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 6px;border-right:1px solid #F0E8EC;}
+.dia-row.selected .dia-fecha{border-right-color:rgba(255,255,255,0.2);}
+.dia-nombre{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);}
+.dia-row.selected .dia-nombre,.dia-row.hoy:not(.selected) .dia-nombre{color:var(--rose);}
+.dia-row.selected .dia-nombre{color:rgba(255,255,255,0.75);}
+.dia-num{font-size:26px;font-weight:900;line-height:1.1;}
+.dia-row.selected .dia-num{color:white;}
+.dia-row.hoy:not(.selected) .dia-num{color:var(--rose);}
+.dia-contenido{flex:1;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;gap:4px;min-width:0;}
+.dia-empty{font-size:12px;color:var(--muted);font-style:italic;}
+.dia-row.selected .dia-empty{color:rgba(255,255,255,0.6);}
+.dia-turno-pill{font-size:11px;font-weight:700;color:var(--mauve);background:#F3EAF5;border-radius:20px;padding:2px 10px;display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dia-row.selected .dia-turno-pill{background:rgba(255,255,255,0.2);color:white;}
+.dia-indicador{width:42px;flex-shrink:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;padding:6px;}
+.nail-icon{font-size:20px;filter:drop-shadow(0 1px 3px rgba(160,64,96,0.4));animation:nailPop 0.4s cubic-bezier(.34,1.56,.64,1);}
+@keyframes nailPop{from{transform:scale(0) rotate(-30deg);}to{transform:scale(1) rotate(0deg);}}
+.nail-count{font-size:9px;font-weight:800;color:var(--rose);line-height:1;}
+.dia-row.selected .nail-count{color:rgba(255,255,255,0.9);}
+.dia-dot-wrap{display:flex;flex-direction:column;gap:3px;align-items:center;}
+.nail-dot{width:7px;height:7px;border-radius:50%;background:#EDE0E5;}
+
+/* TURNOS */
+.turno-card{background:var(--card);border-radius:16px;padding:16px;box-shadow:var(--shadow);margin:0 16px 10px;border-left:4px solid var(--rose-l);}
+.turno-card.realizado{border-left-color:var(--success);opacity:0.6;}
+.turno-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.turno-nombre{font-size:15px;font-weight:700;}
+.turno-precio{font-size:15px;font-weight:800;color:var(--rose);}
+.turno-info{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.turno-chip{font-size:11px;color:var(--muted);}
+.turno-svc{font-size:11px;font-weight:700;color:var(--mauve);background:#F3EAF5;padding:3px 9px;border-radius:20px;}
+.turno-extra-badge{font-size:11px;font-weight:700;color:#5C6BC0;background:#E8EAF6;padding:3px 9px;border-radius:20px;}
+.senia-badge{background:#E8F5E9;color:#2E7D32;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;}
+.turno-actions{display:flex;gap:8px;}
+.btn-realizado{background:linear-gradient(135deg,var(--success),#3D8A5A);color:white;border:none;border-radius:8px;padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;flex:1;}
+.btn-edit-t{background:#F3EAF5;color:var(--mauve);border:none;border-radius:8px;padding:9px 12px;font-size:14px;cursor:pointer;}
+.btn-eliminar-t{background:#FDEAEA;color:var(--danger);border:none;border-radius:8px;padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer;}
+.turno-card.realizado .btn-realizado{background:#bbb;pointer-events:none;}
+
+/* HORA PICKER */
+.hora-picker{display:flex;align-items:center;gap:10px;background:#FAF7F8;border:1.5px solid #EDE0E5;border-radius:12px;padding:10px 16px;}
+.hora-col{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.hora-arrow{background:none;border:none;font-size:18px;color:var(--rose);cursor:pointer;padding:1px 10px;font-weight:900;line-height:1;}
+.hora-display{font-size:28px;font-weight:800;min-width:46px;text-align:center;}
+.hora-sep{font-size:30px;font-weight:900;color:var(--muted);padding-bottom:4px;}
+.ampm-btn{background:var(--rose);color:white;border:none;border-radius:10px;padding:12px 16px;font-size:15px;font-weight:800;cursor:pointer;margin-left:6px;}
+
+/* SERVICIOS */
+.service-hero{margin:0 16px 16px;background:linear-gradient(135deg,var(--rose-d),var(--mauve));color:white;border-radius:22px;padding:26px;text-align:center;box-shadow:0 6px 24px rgba(160,64,96,0.25);}
+.service-hero .price{font-size:44px;font-weight:900;font-style:italic;margin:6px 0;}
+.service-hero .price-lbl{font-size:10px;text-transform:uppercase;letter-spacing:2px;opacity:0.7;}
+.history-item{background:var(--card);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow);margin:0 16px 8px;}
+.history-date{font-size:11px;color:var(--muted);margin-bottom:2px;}
+.history-svc{font-size:13px;font-weight:700;}
+.history-extras{font-size:11px;color:#7B5EA7;font-weight:600;margin-top:2px;}
+.history-gain{font-size:16px;font-weight:900;color:var(--success);}
+
+/* STOCK */
+.list-item{background:var(--card);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow);margin:0 16px 8px;border-left:3px solid var(--rose-l);}
+.list-item-name{font-size:14px;font-weight:600;}
+.list-item-price{font-size:14px;color:var(--rose);font-weight:800;}
+.list-item-right{display:flex;align-items:center;gap:8px;}
+.btn-delete{width:28px;height:28px;background:#FDEAEA;color:var(--danger);border:none;border-radius:8px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.total-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--blush);border-radius:10px;margin:0 16px 12px;}
+.total-row span:first-child{font-size:13px;color:var(--muted);font-weight:600;}
+.total-row span:last-child{font-size:17px;font-weight:800;color:var(--rose);}
+.stock-item{background:var(--card);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow);margin:0 16px 8px;}
+.stock-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.stock-name{font-size:14px;font-weight:700;}
+.stock-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;}
+.stock-ok{background:#D4F0E2;color:#1A6B40;}
+.stock-warn{background:#FDEBD0;color:#8B4A00;}
+.stock-danger{background:#FDDADA;color:#8B0000;}
+.stock-bar-bg{background:var(--blush);border-radius:4px;height:6px;overflow:hidden;margin-bottom:6px;}
+.stock-bar-fill{height:100%;border-radius:4px;transition:width 0.5s;}
+.stock-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);}
+.warn-alert{background:#FFF5E6;border:1px solid #FDDBA0;border-radius:12px;padding:12px 14px;margin:0 16px 8px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;color:#7A4500;}
+/* STOCK MEJORADO */
+.stock-gasto-total{background:linear-gradient(135deg,var(--rose-d),var(--mauve));color:white;border-radius:16px;padding:16px 20px;margin:0 16px 10px;display:flex;justify-content:space-between;align-items:center;}
+.stock-gasto-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:0.8;}
+.stock-gasto-val{font-size:22px;font-weight:900;font-style:italic;}
+.stock-item-actions{display:flex;gap:6px;margin-top:10px;}
+.btn-edit-stock{background:#EEE6FF;color:#6B46C1;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;flex:1;}
+body.dark .btn-edit-stock{background:#2A1A44;color:#B794F4;}
+.stock-recarga-hist{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.recarga-row{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);padding:2px 0;}
+.recarga-row span:last-child{font-weight:700;color:var(--text);}
+.gasto-acum-chip{background:var(--blush);color:var(--rose-d);font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;margin-top:4px;display:inline-block;}
+body.dark .gasto-acum-chip{background:#2A1422;color:var(--rose-l);}
+.stock-precio-actual{font-size:11px;color:var(--muted);margin-top:2px;}
+.modal-subtitle{font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:600;}
+/* CONSUMIBLES POR SERVICIO */
+.consumibles-card{background:var(--card);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);margin:0 16px 16px;}
+.consumible-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.consumible-row:last-child{border-bottom:none;}
+.consumible-check{width:20px;height:20px;accent-color:var(--rose);cursor:pointer;flex-shrink:0;}
+.consumible-name{flex:1;font-size:13px;font-weight:600;}
+.consumible-cant{width:48px;padding:5px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:700;text-align:center;background:var(--input-bg);color:var(--text);}
+.consumible-unit{font-size:11px;color:var(--muted);flex-shrink:0;}
+.consumibles-aviso{background:#FFF5E6;border:1px solid #FDDBA0;border-radius:10px;padding:10px 14px;margin:0 16px 10px;font-size:12px;color:#7A4500;font-weight:600;display:none;}
+body.dark .consumibles-aviso{background:#2A1E0A;border-color:#5A3A0A;color:#F0C070;}
+.descuento-log{font-size:11px;color:var(--muted);margin-top:6px;padding:6px 10px;background:var(--blush);border-radius:8px;}
+body.dark .descuento-log{background:#2A1422;}
+
+/* STATS PAGE */
+.stat-big{background:var(--card);border-radius:20px;padding:22px;box-shadow:var(--shadow);margin:0 16px 12px;text-align:center;}
+.stat-big .big-val{font-size:38px;font-weight:900;font-style:italic;color:var(--rose);}
+.stat-big .big-lbl{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:700;margin-top:4px;}
+.stats-duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:12px;}
+.stat-mini{background:var(--card);border-radius:16px;padding:18px 12px;box-shadow:var(--shadow);text-align:center;}
+.stat-mini .mini-val{font-size:22px;font-weight:800;}
+.stat-mini .mini-lbl{font-size:10px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-top:4px;}
+.top-svc-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F5EEF1;}
+.top-svc-item:last-child{border-bottom:none;}
+
+/* FORM */
+.form-card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin:0 16px 16px;}
+.input-group{margin-bottom:12px;}
+.input-group label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;}
+.input-group input,.input-group select{width:100%;padding:13px 14px;border:1.5px solid #EDE0E5;border-radius:10px;font-size:15px;outline:none;background:#FAF7F8;transition:border 0.2s;-webkit-appearance:none;}
+.input-group input:focus,.input-group select:focus{border-color:var(--rose);background:white;}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.btn{width:100%;padding:15px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;display:block;text-align:center;}
+.btn-rose{background:linear-gradient(135deg,var(--rose-d),var(--rose-l));color:white;box-shadow:0 4px 16px rgba(160,64,96,0.3);}
+.btn-success{background:linear-gradient(135deg,var(--success),#3D8A5A);color:white;}
+.btn-sm{padding:8px 13px;font-size:12px;border-radius:8px;border:none;font-weight:700;cursor:pointer;}
+.empty-state{text-align:center;padding:32px 20px;color:var(--muted);font-size:14px;}
+.empty-icon{font-size:48px;margin-bottom:10px;display:block;}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:white;padding:12px 22px;border-radius:30px;font-size:14px;font-weight:600;opacity:0;transition:all 0.3s;z-index:400;pointer-events:none;white-space:nowrap;max-width:92vw;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.modal-overlay{position:fixed;inset:0;background:rgba(42,31,36,0.45);z-index:300;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.modal-overlay.show{opacity:1;pointer-events:all;}
+.modal-sheet{background:white;border-radius:24px 24px 0 0;padding:24px 20px 40px;width:100%;transform:translateY(30px);transition:transform 0.3s;max-height:92vh;overflow-y:auto;}
+.modal-overlay.show .modal-sheet{transform:translateY(0);}
+.modal-title{font-size:18px;font-weight:900;font-style:italic;margin-bottom:18px;}
+.modal-close{float:right;background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;}
+
+/* EXTRAS */
+.extras-box{background:#F3EAF5;border-radius:14px;padding:14px 16px;margin-bottom:14px;border:1.5px solid #DDD0E8;}
+.extras-title{font-size:11px;font-weight:700;color:var(--mauve);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.extra-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #EBE0F0;}
+.extra-row:last-child{border-bottom:none;}
+.extra-left{display:flex;align-items:center;gap:10px;}
+.extra-chk{width:22px;height:22px;accent-color:var(--mauve);cursor:pointer;flex-shrink:0;}
+.extra-name{font-size:14px;font-weight:600;}
+.extra-subtotal{font-size:13px;font-weight:800;color:var(--mauve);min-width:60px;text-align:right;}
+.unas-ctrl{display:flex;align-items:center;gap:6px;}
+.unas-btn{width:26px;height:26px;border:none;background:var(--rose-d);color:white;border-radius:7px;font-size:16px;font-weight:900;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;}
+.unas-num{font-size:15px;font-weight:800;min-width:22px;text-align:center;}
+.total-bar{background:linear-gradient(135deg,var(--rose-d),var(--mauve));color:white;border-radius:12px;padding:13px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.total-bar-lbl{font-size:11px;text-transform:uppercase;letter-spacing:1px;opacity:0.75;}
+.total-bar-val{font-size:24px;font-weight:900;font-style:italic;}
+.senia-info{background:#E8F5E9;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#2E7D32;font-weight:600;}
+.precio-section-lbl{font-size:11px;font-weight:700;color:var(--mauve);text-transform:uppercase;letter-spacing:0.5px;padding:10px 0 4px;}
+.precio-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F5EEF1;}
+.precio-row:last-child{border-bottom:none;}
+.precio-inp{width:88px;padding:7px 10px;border:1.5px solid #EDE0E5;border-radius:8px;font-size:14px;font-weight:700;color:var(--rose);text-align:right;background:#FAF7F8;outline:none;}
+.precio-inp.extra{color:var(--mauve);}
+/* ── CLIENTAS ── */
+.clienta-card{background:var(--card);border-radius:16px;padding:16px;box-shadow:var(--shadow);margin:0 16px 10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform 0.15s;}
+.clienta-card:active{transform:scale(0.98);}
+.clienta-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--rose-d),var(--mauve));display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:white;flex-shrink:0;text-transform:uppercase;}
+.clienta-info{flex:1;min-width:0;}
+.clienta-nombre{font-size:15px;font-weight:800;}
+.clienta-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+.clienta-stats{display:flex;gap:10px;margin-top:6px;}
+.clienta-stat{font-size:10px;font-weight:700;color:var(--rose);background:var(--blush);padding:2px 8px;border-radius:20px;}
+.clienta-chevron{color:var(--muted);font-size:18px;flex-shrink:0;}
+.recordatorio-alert{background:linear-gradient(135deg,#FFF3E0,#FFE0B2);border:1px solid #FFB74D;border-radius:14px;padding:14px 16px;margin:0 16px 8px;cursor:pointer;}
+.recordatorio-alert .r-title{font-size:13px;font-weight:800;color:#E65100;margin-bottom:4px;}
+.recordatorio-alert .r-sub{font-size:12px;color:#BF360C;}
+/* Ficha */
+.ficha-hero{background:linear-gradient(135deg,var(--rose-d),var(--mauve));border-radius:16px;padding:22px;text-align:center;margin-bottom:18px;color:white;}
+.ficha-avatar{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;margin:0 auto 10px;text-transform:uppercase;}
+.ficha-nombre{font-size:22px;font-weight:900;}
+.ficha-tel{font-size:13px;opacity:0.8;margin-top:4px;}
+.ficha-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;}
+.ficha-stat{background:rgba(255,255,255,0.15);border-radius:12px;padding:10px 6px;text-align:center;}
+.ficha-stat-val{font-size:18px;font-weight:900;}
+.ficha-stat-lbl{font-size:9px;opacity:0.75;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+.ficha-section{font-size:11px;font-weight:700;color:var(--mauve);text-transform:uppercase;letter-spacing:0.5px;margin:14px 0 8px;}
+.ficha-nota{background:var(--blush);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--text);line-height:1.5;}
+.ficha-turno-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F5EEF1;}
+.ficha-turno-item:last-child{border-bottom:none;}
+.ficha-turno-fecha{font-size:11px;color:var(--muted);}
+.ficha-turno-svc{font-size:13px;font-weight:700;margin-top:1px;}
+.ficha-turno-precio{font-size:13px;font-weight:800;color:var(--success);}
+.ficha-turno-extras{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
+.ficha-extra-chip{font-size:10px;font-weight:700;color:#7B5EA7;background:#F0EAF8;padding:2px 8px;border-radius:20px;}
+body.dark .ficha-extra-chip{background:#2A1840;color:#C8A8E8;}
+.ficha-wsp{width:100%;padding:14px;background:linear-gradient(135deg,#25D366,#128C7E);color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;}
+.prox-turno-badge{background:#E8F5E9;border-radius:12px;padding:10px 14px;font-size:13px;color:#2E7D32;font-weight:600;display:flex;align-items:center;gap:8px;margin-top:8px;}
+/* ── STATS GRAPH ── */
+.graph-card{background:var(--card);border-radius:20px;padding:18px 16px 10px;box-shadow:var(--shadow);margin:0 16px 12px;}
+.graph-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;}
+.bar-chart{display:flex;align-items:flex-end;gap:5px;height:90px;padding-bottom:22px;position:relative;}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end;position:relative;}
+.bar{width:100%;border-radius:6px 6px 0 0;background:linear-gradient(180deg,var(--rose-l),var(--rose-d));min-height:3px;transition:height 0.6s cubic-bezier(.4,0,.2,1);position:relative;}
+.bar.activo{background:linear-gradient(180deg,#FFD0DF,var(--rose));box-shadow:0 2px 10px rgba(160,64,96,0.35);}
+.bar-lbl{font-size:8px;font-weight:700;color:var(--muted);position:absolute;bottom:-18px;white-space:nowrap;}
+.bar-val{font-size:7px;font-weight:800;color:var(--rose);position:absolute;top:-14px;white-space:nowrap;}
+.bar.activo .bar-val{color:var(--rose-d);}
+/* Stats mes selector */
+.stats-mes-badge{background:var(--rose);color:white;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700;display:inline-block;margin-bottom:12px;}
+/* Export card internals */
+.export-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.1);}
+.export-row:last-child{border-bottom:none;}
+.export-lbl{font-size:12px;opacity:0.75;}
+.export-val{font-size:14px;font-weight:800;}
+/* ── LISTA DE ESPERA ── */
+.espera-section{margin:0 16px 6px;}
+.espera-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.espera-title{font-size:13px;font-weight:800;color:var(--warn);display:flex;align-items:center;gap:6px;}
+.espera-badge{background:var(--warn);color:white;border-radius:20px;padding:1px 8px;font-size:10px;font-weight:800;}
+.espera-card{background:var(--card);border-radius:14px;padding:13px 14px;box-shadow:var(--shadow);margin-bottom:6px;border-left:4px solid var(--warn);display:flex;align-items:center;gap:10px;}
+.espera-pos{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--warn),#E65100);color:white;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.espera-info{flex:1;min-width:0;}
+.espera-nombre{font-size:14px;font-weight:800;}
+.espera-nota{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.espera-actions{display:flex;gap:6px;flex-shrink:0;}
+.btn-espera-wsp{background:linear-gradient(135deg,#25D366,#128C7E);color:white;border:none;border-radius:8px;padding:7px 10px;font-size:13px;cursor:pointer;}
+.btn-espera-turno{background:var(--rose);color:white;border:none;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-espera-del{background:#FDEAEA;color:var(--danger);border:none;border-radius:8px;padding:7px 9px;font-size:12px;cursor:pointer;}
+body.dark .espera-card{background:var(--card);}
+
+/* ── DARK MODE: TEXTOS EN BLANCO ── */
+body.dark,
+body.dark p,
+body.dark span,
+body.dark div,
+body.dark h1,
+body.dark h2,
+body.dark h3,
+body.dark label,
+body.dark li,
+body.dark td,
+body.dark th {
+  color: var(--text);
+}
+body.dark .section-title,
+body.dark .week-title,
+body.dark .brand h1 {
+  color: var(--text);
+}
+body.dark .summary-label,
+body.dark .feat-sub,
+body.dark .graph-title,
+body.dark .dia-empty,
+body.dark .turno-chip,
+body.dark .history-date,
+body.dark .ficha-section,
+body.dark .stock-meta,
+body.dark .stat-card .lbl,
+body.dark .stat-mini .mini-lbl,
+body.dark .stat-big .big-lbl,
+body.dark .input-group label,
+body.dark .bar-lbl,
+body.dark .espera-nota,
+body.dark .ficha-turno-fecha {
+  color: var(--muted);
+}
+body.dark .summary-val,
+body.dark .stat-card .val,
+body.dark .stat-mini .mini-val,
+body.dark .stat-big .big-val,
+body.dark .turno-nombre,
+body.dark .turno-precio,
+body.dark .list-item-name,
+body.dark .stock-name,
+body.dark .ficha-nombre,
+body.dark .espera-nombre,
+body.dark .history-svc,
+body.dark .ficha-turno-svc,
+body.dark .hora-display,
+body.dark .dia-num {
+  color: var(--text);
+}
+body.dark .week-nav-btn {
+  background: #3A1E2A;
+  color: var(--rose-l);
+}
+body.dark .btn-edit-t {
+  background: #2A1422;
+  color: var(--rose-l);
+}
+body.dark .btn-eliminar-t {
+  background: #2A1010;
+}
+body.dark .btn-delete {
+  background: #2A1010;
+}
+body.dark .turno-svc {
+  background: #2A1830;
+  color: var(--rose-l);
+}
+body.dark .turno-extra-badge {
+  background: #1A1A3A;
+  color: #9FA8DA;
+}
+body.dark .senia-badge {
+  background: #0A2010;
+  color: #7EC89A;
+}
+body.dark .dia-turno-pill {
+  background: #2A1830;
+  color: var(--rose-l);
+}
+body.dark .stock-ok { background: #0A2010; color: #7EC89A; }
+body.dark .stock-warn { background: #2A1A00; color: #FFCC80; }
+body.dark .stock-danger { background: #2A0A0A; color: #EF9A9A; }
+body.dark .warn-alert { color: #FFCC80; }
+body.dark .ficha-nota { color: var(--text); }
+body.dark .total-row span:first-child { color: var(--muted); }
+body.dark .modal-sheet,
+body.dark .modal-sheet * {
+  color: var(--text);
+}
+body.dark .modal-sheet .input-group label,
+body.dark .modal-sheet .feat-sub,
+body.dark .modal-sheet .hora-sep,
+body.dark .modal-sheet .graph-title {
+  color: var(--muted);
+}
+body.dark .clienta-card .ficha-tel { color: var(--muted); }
+body.dark [style*="color:#"] { color: var(--text) !important; }
+body.dark .precio-row span { color: var(--text); }
+</style>
+<body>
+
+<div id="debugPanel" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:red;color:white;padding:10px;font-size:12px;font-family:monospace;"></div>
+<div id="splash">
+  <div class="splash-emoji">💅</div>
+  <div class="splash-title" id="splashTitle">Nail Studio</div>
+  <div class="splash-sub">Premium Management</div>
+  <div class="splash-bar-bg"><div class="splash-bar-fill"></div></div>
+  <div id="installHint" style="display:none;margin-top:28px;background:rgba(255,255,255,0.1);border-radius:14px;padding:14px 18px;max-width:280px;text-align:center;">
+    <div style="font-size:13px;color:rgba(255,255,255,0.9);font-weight:700;margin-bottom:6px;">📲 Instalá la app</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.5;" id="installMsg"></div>
+  </div>
+</div>
+
+<header class="app-header">
+  <div class="brand" onclick="editarNegocio()" style="cursor:pointer;">
+    <h1 id="brandName">Nail Studio 💅</h1>
+    <p id="brandSub">Control del negocio</p>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px;">
+    <button class="dark-toggle" id="darkToggleBtn" onclick="toggleDark()" title="Modo oscuro">🌙</button>
+    <div class="header-icon" onclick="editarNegocio()" title="Editar nombre">✏️</div>
+  </div>
+</header>
+
+<!-- INICIO -->
+<div id="page-inicio" class="page active">
+  <div class="stats-grid" id="statsRow"></div>
+  <div class="featured-card" id="progressCard"></div>
+  <p class="section-title">📋 Resumen</p>
+  <div class="summary-card" id="resumenCard"></div>
+  <p class="section-title">💲 Precios</p>
+  <div class="form-card" id="preciosCard"></div>
+  <p class="section-title">🧤 Consumibles por servicio</p>
+  <p style="font-size:12px;color:var(--muted);margin:-6px 16px 10px;">Seleccioná qué insumos se descuentan automáticamente del stock cada vez que registrás un servicio.</p>
+  <div id="consumiblesAvisoStockBajo" class="consumibles-aviso"></div>
+  <div class="consumibles-card" id="consumiblesCard"></div>
+</div>
+
+<!-- AGENDA -->
+<div id="page-agenda" class="page">
+  <div class="week-header">
+    <button class="week-nav-btn" onclick="cambiarSemana(-1)">‹</button>
+    <div id="weekTitle" class="week-title"></div>
+    <button class="week-nav-btn" onclick="cambiarSemana(1)">›</button>
+  </div>
+  <div class="agenda-swipe" id="agendaSwipe">
+    <div class="agenda-week" id="weekStrip"></div>
+  </div>
+  <!-- Lista de espera del día seleccionado -->
+  <div id="listaEsperaSection"></div>
+  <p class="section-title" id="agendaTitle">📅 Turnos</p>
+  <div id="listaTurnos"></div>
+  <div style="padding:0 16px 16px"><button class="btn btn-rose" onclick="abrirModal(-1)">+ Nuevo turno</button></div>
+</div>
+
+<!-- SERVICIOS -->
+<div id="page-servicios" class="page">
+  <div class="service-hero">
+    <div class="price-lbl">Total a cobrar</div>
+    <div class="price" id="heroTotal">$0</div>
+    <div class="price-lbl" style="margin-top:2px;font-size:11px;" id="heroDetalle">—</div>
+  </div>
+  <div class="form-card">
+    <div class="input-group">
+      <label>Nombre de la clienta</label>
+      <input type="text" id="nombreCliente" placeholder="Ej: María García">
+    </div>
+    <div class="input-group">
+      <label>Tipo de servicio</label>
+      <select id="tipoServicio" onchange="onSvcChange()">
+        <option>Capping gel</option>
+        <option>Capping poly gel</option>
+        <option>Esculpidas polygel</option>
+        <option>Semipermanente</option>
+      </select>
+    </div>
+    <div class="input-row">
+      <div class="input-group">
+        <label>Precio servicio</label>
+        <input type="number" id="precioServicio" value="0" oninput="calcTotal()">
+      </div>
+      <div class="input-group">
+        <label>Materiales</label>
+        <input type="number" id="costoServicio" placeholder="0">
+      </div>
+    </div>
+    <div class="extras-box">
+      <div class="extras-title">✨ Extras</div>
+      <div class="extra-row">
+        <div class="extra-left">
+          <input type="checkbox" class="extra-chk" id="s_ret" onchange="calcTotal()">
+          <span class="extra-name">Retirado</span>
+        </div>
+        <span class="extra-subtotal" id="s_ret_lbl">$0</span>
+      </div>
+      <div class="extra-row">
+        <div class="extra-left">
+          <input type="checkbox" class="extra-chk" id="s_reto" onchange="calcTotal()">
+          <span class="extra-name">Retirado otro salón</span>
+        </div>
+        <span class="extra-subtotal" id="s_reto_lbl">$0</span>
+      </div>
+      <div class="extra-row">
+        <div class="extra-left">
+          <input type="checkbox" class="extra-chk" id="s_arr" onchange="unasChkChange('s')">
+          <span class="extra-name">Arreglo x uña</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="unas-ctrl">
+            <button class="unas-btn" onclick="unas('s',-1)">−</button>
+            <span class="unas-num" id="s_unas">0</span>
+            <button class="unas-btn" onclick="unas('s',1)">+</button>
+          </div>
+          <span class="extra-subtotal" id="s_arr_lbl">$0</span>
+        </div>
+      </div>
+    </div>
+    <div class="total-bar">
+      <span class="total-bar-lbl">Total</span>
+      <span class="total-bar-val" id="s_total">$0</span>
+    </div>
+    <button class="btn btn-success" onclick="registrarServicio()">✓ Registrar servicio</button>
+  </div>
+  <p class="section-title">📝 Historial</p>
+  <div id="historialServicios" style="padding-bottom:24px"></div>
+</div>
+
+<!-- STOCK -->
+<div id="page-inversion" class="page">
+  <p class="section-title">🛠 Inversión única <span class="badge" id="badgeUnica">0</span></p>
+  <div id="listaUnica"></div>
+  <div class="total-row" id="totalUnicaRow" style="display:none"><span>Total</span><span id="totalUnica"></span></div>
+  <div class="form-card">
+    <div class="input-group"><label>Nombre</label><input type="text" id="nombreUnica" placeholder="Ej: Torno eléctrico"></div>
+    <div class="input-group"><label>Precio</label><input type="number" id="precioUnica" placeholder="0"></div>
+    <button class="btn btn-rose" onclick="agregarUnica()">+ Agregar item</button>
+  </div>
+  <p class="section-title">🧴 Insumos mensuales <span class="badge" id="badgeMensual">0</span></p>
+  <div id="stockGastoTotal" class="stock-gasto-total" style="display:none">
+    <div><div class="stock-gasto-lbl">💸 Total gastado en recargas</div><div id="stockGastoVal" class="stock-gasto-val">$0</div></div>
+    <span style="font-size:32px">📦</span>
+  </div>
+  <div id="alertasStock"></div>
+  <div id="listaMensual"></div>
+  <div class="total-row" id="totalMensualRow" style="display:none"><span>Precio actual (suma)</span><span id="totalMensual"></span></div>
+  <div class="form-card">
+    <div class="input-group"><label>Nombre</label><input type="text" id="nombreMensual" placeholder="Ej: Guantes T(M)"></div>
+    <div class="input-row">
+      <div class="input-group"><label>Precio (por caja/paquete)</label><input type="number" id="precioMensual" placeholder="0"></div>
+      <div class="input-group">
+        <label>Unidades por caja</label>
+        <input type="number" id="unidadxCajaMensual" placeholder="1" min="1">
+        <p style="font-size:10px;color:var(--muted);margin-top:3px;">Ej: guantes=100 · lima=1</p>
+      </div>
+    </div>
+    <div class="input-row">
+      <div class="input-group"><label>Cajas iniciales</label><input type="number" id="stockActual" placeholder="1"></div>
+      <div class="input-group"><label>Stock mínimo (unidades)</label><input type="number" id="stockMin" placeholder="10"></div>
+    </div>
+    <button class="btn btn-rose" onclick="agregarMensual()">+ Agregar insumo</button>
+  </div>
+</div>
+
+<!-- CLIENTAS -->
+<div id="page-clientas" class="page">
+  <!-- Buscador -->
+  <div style="padding:16px 16px 8px;">
+    <div style="position:relative;">
+      <input type="text" id="buscadorClientas" placeholder="🔍 Buscar clienta..." oninput="renderClientas()" style="width:100%;padding:13px 14px 13px 16px;border:1.5px solid #EDE0E5;border-radius:12px;font-size:14px;outline:none;background:white;">
+    </div>
+  </div>
+  <!-- Alertas recordatorio -->
+  <div id="alertasRecordatorio"></div>
+  <!-- Lista clientas -->
+  <p class="section-title">👩 Mis Clientas <span class="badge" id="badgeClientas">0</span></p>
+  <div id="listaClientas"></div>
+  <div style="padding:0 16px 16px"><button class="btn btn-rose" onclick="abrirModalClientas(-1)">+ Nueva clienta</button></div>
+</div>
+
+<!-- STATS -->
+<div id="page-stats" class="page">
+  <!-- Navegador de mes -->
+  <div class="week-header" style="padding-bottom:4px;">
+    <button class="week-nav-btn" onclick="cambiarMesStats(-1)">‹</button>
+    <div id="statsMonthTitle" class="week-title" style="font-size:17px;font-weight:900;"></div>
+    <button class="week-nav-btn" onclick="cambiarMesStats(1)">›</button>
+  </div>
+  <div id="statsContent"></div>
+  <!-- Botón exportar -->
+  <div style="padding:8px 16px 24px;">
+    <button onclick="exportarResumen()" style="width:100%;padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#2A0A1E,#5C1A3A);color:white;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+      📸 Exportar resumen del mes
+    </button>
+  </div>
+</div>
+
+<!-- TABS -->
+<nav class="tabs">
+  <div class="tab-wrap"><button class="tab-btn active" id="tab-inicio" onclick="showTab('inicio')"><span class="tab-icon">🏠</span><span>Inicio</span></button></div>
+  <div class="tab-wrap">
+    <button class="tab-btn" id="tab-agenda" onclick="showTab('agenda')"><span class="tab-icon">📅</span><span>Agenda</span></button>
+    <div class="notif-dot" id="notifDot"></div>
+  </div>
+  <div class="tab-wrap"><button class="tab-btn" id="tab-servicios" onclick="showTab('servicios')"><span class="tab-icon">💅</span><span>Cobrar</span></button></div>
+  <div class="tab-wrap">
+    <button class="tab-btn" id="tab-clientas" onclick="showTab('clientas')"><span class="tab-icon">👩‍🦰</span><span>Clientas</span></button>
+    <div class="notif-dot" id="notifClientas"></div>
+  </div>
+  <div class="tab-wrap"><button class="tab-btn" id="tab-inversion" onclick="showTab('inversion')"><span class="tab-icon">📦</span><span>Stock</span></button></div>
+  <div class="tab-wrap"><button class="tab-btn" id="tab-stats" onclick="showTab('stats')"><span class="tab-icon">📊</span><span>Stats</span></button></div>
+</nav>
+
+<!-- MODAL TURNO -->
+<div class="modal-overlay" id="modalTurno">
+  <div class="modal-sheet">
+    <button class="modal-close" onclick="cerrarModal()">✕</button>
+    <div class="modal-title" id="modalTitulo">💅 Nuevo Turno</div>
+    <div class="input-group"><label>Fecha</label><input type="date" id="tFecha"></div>
+    <div class="input-group">
+      <label>Hora</label>
+      <div class="hora-picker">
+        <div class="hora-col">
+          <button class="hora-arrow" onclick="cambiarHora(1)">▲</button>
+          <div class="hora-display" id="horaDisp">09</div>
+          <button class="hora-arrow" onclick="cambiarHora(-1)">▼</button>
+        </div>
+        <div class="hora-sep">:</div>
+        <div class="hora-col">
+          <button class="hora-arrow" onclick="cambiarMin(1)">▲</button>
+          <div class="hora-display" id="minDisp">00</div>
+          <button class="hora-arrow" onclick="cambiarMin(-1)">▼</button>
+        </div>
+        <button class="ampm-btn" id="ampmBtn" onclick="toggleAmPm()">AM</button>
+      </div>
+    </div>
+    <div class="input-group"><label>Nombre de la clienta</label><input type="text" id="tNombre" placeholder="Ej: María García"></div>
+    <div class="input-group">
+      <label>Tipo de servicio</label>
+      <select id="tServicio" onchange="onTSvcChange()">
+        <option>Capping gel</option>
+        <option>Capping poly gel</option>
+        <option>Esculpidas polygel</option>
+        <option>Semipermanente</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>Precio servicio</label>
+      <input type="number" id="tPrecio" placeholder="0" oninput="onTPrecioChange()">
+    </div>
+
+    <div class="extras-box">
+      <div class="extras-title">✨ Extras</div>
+      <div class="extra-row">
+        <div class="extra-left">
+          <input type="checkbox" class="extra-chk" id="t_ret" onchange="calcTotalTurno()">
+          <span class="extra-name">Retirado</span>
+        </div>
+        <span class="extra-subtotal" id="t_ret_lbl">$0</span>
+      </div>
+      <div class="extra-row">
+        <div class="extra-left">
+          <input type="checkbox" class="extra-chk" id="t_reto" onchange="calcTotalTurno()">
+          <span class="extra-name">Retirado otro salón</span>
+        </div>
+        <span class="extra-subtotal" id="t_reto_lbl">$0</span>
+      </div>
+      <div class="extra-row">
+        <div class="extra-left">
+          <input type="checkbox" class="extra-chk" id="t_arr" onchange="unasChkChange('t')">
+          <span class="extra-name">Arreglo x uña</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="unas-ctrl">
+            <button class="unas-btn" onclick="unas('t',-1)">−</button>
+            <span class="unas-num" id="t_unas">0</span>
+            <button class="unas-btn" onclick="unas('t',1)">+</button>
+          </div>
+          <span class="extra-subtotal" id="t_arr_lbl">$0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="total-bar">
+      <span class="total-bar-lbl">Total</span>
+      <span class="total-bar-val" id="t_total">$0</span>
+    </div>
+
+    <!-- SEÑA: solo mitad del servicio, sin extras -->
+    <div class="senia-info" id="seniaInfo" style="display:none">
+      💰 Seña sugerida (50% del servicio): <strong id="seniaVal">$0</strong>
+    </div>
+    <div class="input-group">
+      <label>Seña 💰 (solo del servicio, sin extras)</label>
+      <input type="number" id="tSenia" placeholder="0" readonly style="background:#F5EEF1;color:var(--mauve);font-weight:700;">
+    </div>
+
+    <button class="btn btn-rose" id="btnGuardar" onclick="guardarTurno()">Guardar turno 📅</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- MODAL EDITAR NEGOCIO -->
+<div class="modal-overlay" id="modalNegocio">
+  <div class="modal-sheet">
+    <button class="modal-close" onclick="gs('modalNegocio').classList.remove('show')">✕</button>
+    <div class="modal-title">✏️ Tu negocio</div>
+    <div class="input-group"><label>Nombre del negocio</label><input type="text" id="inputNegocioNombre" placeholder="Ej: Nail Studio by Sol" maxlength="30"></div>
+    <div class="input-group"><label>Eslogan / subtítulo</label><input type="text" id="inputNegocioSub" placeholder="Ej: Uñas que brillan 💅" maxlength="35"></div>
+    <button class="btn btn-rose" onclick="guardarNegocio()">Guardar ✓</button>
+  </div>
+</div>
+
+<!-- MODAL EXPORTAR -->
+<div class="modal-overlay" id="modalExport">
+  <div class="modal-sheet" style="max-height:95vh">
+    <button class="modal-close" onclick="gs('modalExport').classList.remove('show')">✕</button>
+    <div class="modal-title">📸 Resumen del mes</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Hacé captura de pantalla de esta tarjeta para guardarla o compartirla.</p>
+    <div id="exportCard" style="background:linear-gradient(160deg,#2A0A1E,#5C1A3A);border-radius:22px;padding:26px 22px;color:white;"></div>
+    <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:14px;">📱 Tomá una captura de pantalla para guardar</p>
+  </div>
+</div>
+
+<!-- MODAL LISTA DE ESPERA -->
+<div class="modal-overlay" id="modalEspera">
+  <div class="modal-sheet">
+    <button class="modal-close" onclick="gs('modalEspera').classList.remove('show')">✕</button>
+    <div class="modal-title">⏳ Agregar a lista de espera</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Para el día <strong id="esperaDiaLabel"></strong></p>
+    <div class="input-group"><label>Nombre</label><input type="text" id="eNombre" placeholder="Ej: Laura González"></div>
+    <div class="input-group"><label>Teléfono (opcional)</label><input type="tel" id="eTelefono" placeholder="Ej: 11 2345-6789"></div>
+    <div class="input-group"><label>Servicio que quiere</label>
+      <select id="eServicio" style="width:100%;padding:13px 14px;border:1.5px solid #EDE0E5;border-radius:10px;font-size:14px;outline:none;background:var(--input-bg);color:var(--text);">
+        <option>Capping gel</option>
+        <option>Capping poly gel</option>
+        <option>Esculpidas polygel</option>
+        <option>Semipermanente</option>
+        <option>Sin definir</option>
+      </select>
+    </div>
+    <div class="input-group"><label>Nota (opcional)</label><input type="text" id="eNota" placeholder="Ej: Quiere a las 10hs, flexible"></div>
+    <button class="btn btn-rose" onclick="guardarEspera()">Agregar a lista ⏳</button>
+  </div>
+</div>
+<div class="modal-overlay" id="modalFichaClienta">
+  <div class="modal-sheet" style="max-height:95vh">
+    <button class="modal-close" onclick="cerrarModalFicha()">✕</button>
+    <div id="fichaContent"></div>
+  </div>
+</div>
+
+<!-- MODAL NUEVA/EDITAR CLIENTA -->
+<div class="modal-overlay" id="modalClientaForm">
+  <div class="modal-sheet">
+    <button class="modal-close" onclick="cerrarModalClientaForm()">✕</button>
+    <div class="modal-title" id="modalClientaTitulo">👩 Nueva Clienta</div>
+    <div class="input-group"><label>Nombre completo</label><input type="text" id="cNombre" placeholder="Ej: María García"></div>
+    <div class="input-group"><label>Teléfono (opcional)</label><input type="tel" id="cTelefono" placeholder="Ej: 11 2345-6789"></div>
+    <div class="input-group"><label>Notas / preferencias</label><textarea id="cNotas" placeholder="Ej: Le gusta el estilo francés, alérgica al gel..." style="width:100%;padding:13px 14px;border:1.5px solid #EDE0E5;border-radius:10px;font-size:14px;outline:none;background:#FAF7F8;resize:none;min-height:80px;font-family:inherit;"></textarea></div>
+    <div class="input-group">
+      <label>Recordatorio automático (días antes del turno)</label>
+      <select id="cRecordatorio" style="width:100%;padding:13px 14px;border:1.5px solid #EDE0E5;border-radius:10px;font-size:14px;outline:none;background:#FAF7F8;">
+        <option value="0">Sin recordatorio</option>
+        <option value="1" selected>1 día antes</option>
+        <option value="2">2 días antes</option>
+        <option value="3">3 días antes</option>
+      </select>
+    </div>
+    <button class="btn btn-rose" id="btnGuardarClienta" onclick="guardarClienta()">Guardar clienta 👩</button>
+  </div>
+</div>
+
+<script>
+// ─── ERROR HANDLER VISIBLE ───────────────────────────────
+window.onerror = function(msg, src, line, col, err){
+  var panel = document.getElementById("debugPanel");
+  if(panel){
+    panel.style.display = "block";
+    panel.innerHTML += "<b>ERROR:</b> " + msg + " (línea " + line + ")<br>";
+  }
+  return false;
+};
+// ─── UTILS ───────────────────────────────────────────────
+function pad(n){return n<10?"0"+n:""+n;}
+function hoy(){var d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function fmt(n){return "$"+Math.round(n).toLocaleString("es-AR");}
+function showToast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(function(){t.classList.remove("show");},2600);}
+function gs(id){return document.getElementById(id);}
+// ─── STORAGE (safe fallback si localStorage no está disponible) ──
+var _memStore={};
+var _ls=(function(){
+  try{localStorage.setItem("__t","1");localStorage.removeItem("__t");return localStorage;}
+  catch(e){
+    return {
+      getItem:function(k){return _memStore[k]!==undefined?_memStore[k]:null;},
+      setItem:function(k,v){_memStore[k]=String(v);},
+      removeItem:function(k){delete _memStore[k];}
+    };
+  }
+})();
+function lsParse(k){try{var v=_ls.getItem(k);return v?JSON.parse(v):null;}catch(e){return null;}}
+function lsSave(k,v){try{_ls.setItem(k,JSON.stringify(v));}catch(e){_memStore[k]=JSON.stringify(v);}}
+
+// ─── DATOS ───────────────────────────────────────────────
+var PRECIOS_SVC_DEF={"Capping gel":10000,"Capping poly gel":10000,"Esculpidas polygel":12000,"Semipermanente":8000};
+var PRECIOS_EXT_DEF={"Retirado":1000,"Retirado otro salon":2000,"Arreglo por una":300};
+var UNICOS_DEF=[{nombre:"Curso",precio:90000},{nombre:"Envío torno y cabina",precio:8000},{nombre:"Torno y cabina",precio:63000}];
+var MENSUALES_DEF=[
+  {nombre:"Guantes T(M)",precio:8120,stock:2,stockMin:1},{nombre:"Adhere",precio:1610,stock:2,stockMin:1},
+  {nombre:"Ultra bond",precio:8400,stock:1,stockMin:1},{nombre:"Base Cheu",precio:8400,stock:1,stockMin:1},
+  {nombre:"Top Meliné",precio:7000,stock:1,stockMin:1},{nombre:"Lima 100/180",precio:600,stock:3,stockMin:2},
+  {nombre:"Lima 240/360",precio:600,stock:3,stockMin:2},{nombre:"Clarificador",precio:4340,stock:1,stockMin:1},
+  {nombre:"Cepillo x2",precio:560,stock:2,stockMin:1},{nombre:"Fresas x2",precio:3220,stock:1,stockMin:1},
+  {nombre:"Palitos de naranja",precio:2240,stock:2,stockMin:1},{nombre:"Wipers",precio:3150,stock:1,stockMin:1},
+  {nombre:"Tijera p/ cutícula",precio:12880,stock:1,stockMin:1},{nombre:"Aceite p/ cutícula",precio:2380,stock:2,stockMin:1},
+  {nombre:"Polygel",precio:8170,stock:1,stockMin:1},{nombre:"Moldes",precio:11340,stock:2,stockMin:1},
+  {nombre:"Pincel liner",precio:2380,stock:1,stockMin:1},{nombre:"Set pinceles 15U",precio:2450,stock:1,stockMin:1},
+  {nombre:"Pincel p/ polygel",precio:2100,stock:1,stockMin:1},{nombre:"Buffer block",precio:700,stock:3,stockMin:2},
+  {nombre:"Dapper",precio:700,stock:2,stockMin:1},{nombre:"Colores x6",precio:10080,stock:1,stockMin:1},
+  {nombre:"Polvos x6",precio:5400,stock:1,stockMin:1}
+];
+
+var preciosSvc = lsParse("preciosSvc") || JSON.parse(JSON.stringify(PRECIOS_SVC_DEF));
+var preciosExt = lsParse("preciosExt") || JSON.parse(JSON.stringify(PRECIOS_EXT_DEF));
+var invUnica   = lsParse("unica")      || UNICOS_DEF;
+var insMensual = lsParse("mensual")    || MENSUALES_DEF;
+var historial  = lsParse("historial")  || [];
+var turnos     = lsParse("turnos")     || [];
+var clientas = (function(){ var v=lsParse("clientas"); return Array.isArray(v)?v:[]; })();
+var listaEspera= lsParse("listaEspera")|| {};
+var ganancia   = parseFloat(lsParse("ganancia"))||0;
+var negocio    = lsParse("negocio")    || {nombre:"Nail Studio 💅", sub:"Control del negocio"};
+// consumiblesSvc: [{nombre, cant, activo}] — insumos que se descuentan por servicio
+var consumiblesSvc = lsParse("consumiblesSvc") || [];
+var statsAnio, stMes;
+(function(){var d=new Date();statsAnio=d.getFullYear();stMes=d.getMonth();}());
+var diaSelected= hoy();
+var calYear, calMonth;
+(function(){var d=new Date();calYear=d.getFullYear();calMonth=d.getMonth();}());
+
+if(!lsParse("unica"))   lsSave("unica",   UNICOS_DEF);
+if(!lsParse("mensual")) lsSave("mensual", MENSUALES_DEF);
+
+function guardar(){
+  lsSave("preciosSvc",preciosSvc);lsSave("preciosExt",preciosExt);
+  lsSave("unica",invUnica);lsSave("mensual",insMensual);
+  lsSave("historial",historial);lsSave("turnos",turnos);
+  lsSave("clientas",clientas);lsSave("negocio",negocio);lsSave("galeriaFotos",galeriaFotos);lsSave("listaEspera",listaEspera);
+  lsSave("ganancia",ganancia);lsSave("consumiblesSvc",consumiblesSvc);
+}
+function syncNegocioHeader(){
+  gs("brandName").textContent=negocio.nombre;
+  gs("brandSub").textContent=negocio.sub;
+  document.title=negocio.nombre.replace(/[^\w\s]/g,"").trim()||"Nail Studio";
+}
+function editarNegocio(){
+  gs("inputNegocioNombre").value=negocio.nombre;
+  gs("inputNegocioSub").value=negocio.sub;
+  gs("modalNegocio").classList.add("show");
+}
+function guardarNegocio(){
+  var n=gs("inputNegocioNombre").value.trim()||"Nail Studio 💅";
+  var s=gs("inputNegocioSub").value.trim()||"Control del negocio";
+  negocio={nombre:n,sub:s};
+  guardar();syncNegocioHeader();
+  gs("modalNegocio").classList.remove("show");
+  showToast("✅ Nombre actualizado!");
+}
+
+// ─── HORA PICKER ─────────────────────────────────────────
+var _h=9,_m=0,_ap="AM";
+function cambiarHora(d){_h=(_h+d-1+12)%12+1;syncHora();}
+function cambiarMin(d){_m=(_m+d+60)%60;syncHora();}
+function toggleAmPm(){_ap=_ap==="AM"?"PM":"AM";syncHora();}
+function syncHora(){gs("horaDisp").textContent=pad(_h);gs("minDisp").textContent=pad(_m);gs("ampmBtn").textContent=_ap;}
+function getHora24(){var h=_h%12+(_ap==="PM"?12:0);return pad(h)+":"+pad(_m);}
+function setHora(s){if(!s){_h=9;_m=0;_ap="AM";syncHora();return;}var p=s.split(":");var h=parseInt(p[0]),m=parseInt(p[1]||0);_ap=h>=12?"PM":"AM";_h=h%12||12;_m=m;syncHora();}
+function fmtHora(s){if(!s)return"";var p=s.split(":");var h=parseInt(p[0]),m=parseInt(p[1]||0);return(h%12||12)+":"+pad(m)+(h>=12?" PM":" AM");}
+
+// ─── AGENDA SEMANAL ──────────────────────────────────────
+var semanaBase = new Date(); // lunes de referencia
+semanaBase.setHours(0,0,0,0);
+// ajustar al lunes de la semana actual
+(function(){
+  var d=semanaBase.getDay(); // 0=dom
+  var diff=d===0?-6:1-d;
+  semanaBase.setDate(semanaBase.getDate()+diff);
+}());
+
+var NM_LARGO=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+var NM_CORTO=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+var DIAS_CORTO=["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
+
+function cambiarSemana(d){
+  var dir=d>0?1:-1;
+  semanaBase=new Date(semanaBase);
+  semanaBase.setDate(semanaBase.getDate()+d*7);
+  renderSemana(dir);
+}
+
+function renderSemana(animDir){
+  var strip=gs("weekStrip");
+  var hoyStr=hoy();
+  var fin=new Date(semanaBase);fin.setDate(fin.getDate()+6);
+  var tit=semanaBase.getDate()+" "+NM_CORTO[semanaBase.getMonth()];
+  tit+=" — "+fin.getDate()+" "+NM_CORTO[fin.getMonth()]+" "+fin.getFullYear();
+  gs("weekTitle").textContent=tit;
+
+  // Build new content
+  var html="";
+  for(var i=0;i<7;i++){
+    var d=new Date(semanaBase);
+    d.setDate(d.getDate()+i);
+    var key=d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+    var delDia=turnos.filter(function(t){return t.fecha===key&&!t.realizado;});
+    var isHoy=key===hoyStr;
+    var isSel=key===diaSelected;
+    var cls="dia-row"+(isHoy?" hoy":"")+(isSel?" selected":"");
+
+    // Indicador derecha
+    var indicador="";
+    if(delDia.length>0){
+      indicador='<div class="dia-indicador"><span class="nail-icon">💅</span><span class="nail-count">'+delDia.length+'</span></div>';
+    } else {
+      indicador='<div class="dia-indicador"><div class="nail-dot"></div></div>';
+    }
+
+    // Pills de turnos
+    var contenidoInner="";
+    if(delDia.length===0){
+      contenidoInner='<span class="dia-empty">Sin turnos</span>';
+    } else {
+      delDia.slice(0,2).forEach(function(t){
+        contenidoInner+='<span class="dia-turno-pill">⏰ '+fmtHora(t.hora)+'  '+t.nombre+'</span>';
+      });
+      if(delDia.length>2){
+        contenidoInner+='<span class="dia-turno-pill">+' +(delDia.length-2)+' más</span>';
+      }
+    }
+
+    html+='<div class="'+cls+'" onclick="selDia(\''+key+'\')">'
+      +'<div class="dia-fecha"><div class="dia-nombre">'+DIAS_CORTO[i]+'</div><div class="dia-num">'+d.getDate()+'</div></div>'
+      +'<div class="dia-contenido">'+contenidoInner+'</div>'
+      +indicador
+      +'</div>';
+  }
+
+  if(animDir){
+    // Slide animation
+    var from=animDir>0?'100%':'-100%';
+    strip.style.transition='none';
+    strip.style.transform='translateX('+from+')';
+    strip.innerHTML=html;
+    // Force reflow
+    strip.getBoundingClientRect();
+    strip.style.transition='transform 0.28s cubic-bezier(.4,0,.2,1)';
+    strip.style.transform='translateX(0)';
+  } else {
+    strip.innerHTML=html;
+    strip.style.transform='translateX(0)';
+  }
+}
+
+// Swipe support
+(function(){
+  var sx=0,sy=0,swiping=false;
+  document.addEventListener('touchstart',function(e){
+    if(!gs("page-agenda").classList.contains("active"))return;
+    var t=e.touches[0];sx=t.clientX;sy=t.clientY;swiping=false;
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+    if(!gs("page-agenda").classList.contains("active"))return;
+    var t=e.touches[0];
+    var dx=t.clientX-sx,dy=t.clientY-sy;
+    if(!swiping&&Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>8){swiping=true;}
+  },{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(!gs("page-agenda").classList.contains("active")||!swiping)return;
+    var t=e.changedTouches[0];
+    var dx=t.clientX-sx;
+    if(Math.abs(dx)>50){
+      cambiarSemana(dx<0?1:-1);
+    }
+    swiping=false;
+  },{passive:true});
+}());
+
+function selDia(k){
+  diaSelected=k;
+  var kDate=new Date(k);kDate.setHours(0,0,0,0);
+  var finSem=new Date(semanaBase);finSem.setDate(finSem.getDate()+6);
+  if(kDate<semanaBase||kDate>finSem){
+    var dow=kDate.getDay();var diff=dow===0?-6:1-dow;
+    semanaBase=new Date(kDate);semanaBase.setDate(semanaBase.getDate()+diff);
+  }
+  renderSemana(0);
+  renderTurnos();
+}
+
+// ─── EXTRAS ──────────────────────────────────────────────
+function getUnas(pfx){var el=gs(pfx+"_unas");return el?parseInt(el.textContent)||0:0;}
+function setUnas(pfx,v){var el=gs(pfx+"_unas");if(el)el.textContent=v;}
+
+function unas(pfx,d){
+  var v=Math.max(0,getUnas(pfx)+d);
+  setUnas(pfx,v);
+  var chk=gs(pfx+"_arr");if(chk)chk.checked=(v>0);
+  if(pfx==="s")calcTotal();else calcTotalTurno();
+}
+
+function unasChkChange(pfx){
+  var chk=gs(pfx+"_arr");
+  if(chk&&!chk.checked){setUnas(pfx,0);}
+  else if(chk&&chk.checked&&getUnas(pfx)===0){setUnas(pfx,1);}
+  if(pfx==="s")calcTotal();else calcTotalTurno();
+}
+
+function calcExtras(pfx){
+  var total=0;
+  var ret=gs(pfx+"_ret"),reto=gs(pfx+"_reto"),arr=gs(pfx+"_arr");
+  var pRet=preciosExt["Retirado"]||0;
+  var pReto=preciosExt["Retirado otro salon"]||0;
+  var pArr=preciosExt["Arreglo por una"]||0;
+  var cant=getUnas(pfx);
+  if(ret&&ret.checked){total+=pRet;gs(pfx+"_ret_lbl").textContent=fmt(pRet);}
+  else if(gs(pfx+"_ret_lbl"))gs(pfx+"_ret_lbl").textContent="$0";
+  if(reto&&reto.checked){total+=pReto;gs(pfx+"_reto_lbl").textContent=fmt(pReto);}
+  else if(gs(pfx+"_reto_lbl"))gs(pfx+"_reto_lbl").textContent="$0";
+  if(arr&&arr.checked&&cant>0){total+=pArr*cant;gs(pfx+"_arr_lbl").textContent=fmt(pArr*cant);}
+  else if(gs(pfx+"_arr_lbl"))gs(pfx+"_arr_lbl").textContent="$0";
+  return total;
+}
+
+function getExtrasData(pfx){
+  var lista=[];
+  var ret=gs(pfx+"_ret"),reto=gs(pfx+"_reto"),arr=gs(pfx+"_arr");
+  var cant=getUnas(pfx);
+  if(ret&&ret.checked)  lista.push({nombre:"Retirado",precio:preciosExt["Retirado"]||0,cant:1});
+  if(reto&&reto.checked)lista.push({nombre:"Retirado otro salón",precio:preciosExt["Retirado otro salon"]||0,cant:1});
+  if(arr&&arr.checked&&cant>0)  lista.push({nombre:"Arreglo por uña",precio:preciosExt["Arreglo por una"]||0,cant:cant});
+  return lista;
+}
+
+function resetExtrasForm(pfx){
+  ["ret","reto","arr"].forEach(function(x){var el=gs(pfx+"_"+x);if(el)el.checked=false;});
+  setUnas(pfx,0);
+  ["ret_lbl","reto_lbl","arr_lbl"].forEach(function(x){var el=gs(pfx+"_"+x);if(el)el.textContent="$0";});
+}
+
+// ─── CÁLCULO SERVICIOS ───────────────────────────────────
+function calcTotal(){
+  var base=parseFloat(gs("precioServicio").value)||0;
+  var exTotal=calcExtras("s");
+  var total=base+exTotal;
+  gs("s_total").textContent=fmt(total);
+  gs("heroTotal").textContent=fmt(total);
+  var partes=[gs("tipoServicio").value+" "+fmt(base)];
+  if(gs("s_ret").checked)partes.push("Retirado");
+  if(gs("s_reto").checked)partes.push("Ret.otro salón");
+  if(gs("s_arr").checked){var c=getUnas("s");partes.push("Arreglo x"+Math.max(c,1));}
+  gs("heroDetalle").textContent=partes.join(" + ");
+}
+
+function onSvcChange(){
+  gs("precioServicio").value=preciosSvc[gs("tipoServicio").value]||0;
+  calcTotal();
+}
+
+// ─── CÁLCULO TURNO ───────────────────────────────────────
+function onTPrecioChange(){
+  calcTotalTurno();
+}
+
+function onTSvcChange(){
+  gs("tPrecio").value=preciosSvc[gs("tServicio").value]||0;
+  calcTotalTurno();
+}
+
+function calcTotalTurno(){
+  var base=parseFloat(gs("tPrecio").value)||0;
+  var exTotal=calcExtras("t");
+  var total=base+exTotal;
+  gs("t_total").textContent=fmt(total);
+  // Seña = SOLO mitad del servicio base, NO incluye extras
+  var senia=Math.round(base/2);
+  gs("tSenia").value=senia>0?senia:"";
+  if(base>0){
+    gs("seniaVal").textContent=fmt(senia);
+    gs("seniaInfo").style.display="block";
+  } else {
+    gs("seniaInfo").style.display="none";
+  }
+}
+
+// ─── REGISTRAR SERVICIO ───────────────────────────────────
+function registrarServicio(){
+  var tipo=gs("tipoServicio").value;
+  var nombre=gs("nombreCliente").value.trim();
+  var base=parseFloat(gs("precioServicio").value)||0;
+  var costo=parseFloat(gs("costoServicio").value)||0;
+  var extras=getExtrasData("s");
+  var exTotal=extras.reduce(function(s,e){return s+e.precio*e.cant;},0);
+  var precio=base+exTotal;
+  var gan=precio-costo;
+  var now=new Date();
+  var dd=pad(now.getDate()),mm=pad(now.getMonth()+1),yyyy=now.getFullYear();
+  var hh=pad(now.getHours()),min=pad(now.getMinutes());
+  // Guardar fecha como YYYY-MM-DD HH:MM para fácil parseo
+  var fecha=yyyy+"-"+mm+"-"+dd+" "+hh+":"+min;
+  historial.push({fecha:fecha,servicio:tipo,nombre:nombre,precio:precio,costo:costo,ganancia:gan,extras:extras});
+  ganancia+=gan;
+  gs("costoServicio").value="";gs("nombreCliente").value="";
+  resetExtrasForm("s");
+  gs("precioServicio").value=preciosSvc[gs("tipoServicio").value]||0;
+  calcTotal();
+  descontarConsumiblesPorServicio();
+  guardar();mostrar();renderHistorial();renderStats();
+  showToast("✅ +"+fmt(gan)+" registrado!");
+}
+
+function borrarServicio(i){
+  ganancia=Math.max(0,ganancia-historial[i].ganancia);
+  historial.splice(i,1);
+  guardar();mostrar();renderHistorial();renderStats();showToast("🗑 Eliminado");
+}
+
+// ─── RENDER HISTORIAL ────────────────────────────────────
+function renderHistorial(){
+  var el=gs("historialServicios");
+  if(!historial.length){el.innerHTML='<div class="empty-state"><span class="empty-icon">📋</span>Sin servicios todavía</div>';return;}
+  el.innerHTML="";
+  historial.slice().reverse().forEach(function(s,ri){
+    var i=historial.length-1-ri;
+    var exStr="";
+    if(s.extras&&s.extras.length){
+      exStr='<div class="history-extras">+ '+s.extras.map(function(e){return e.nombre+(e.cant>1?" x"+e.cant:"");}).join(" · ")+'</div>';
+    }
+    var cn=s.nombre?'<span style="color:var(--mauve);font-weight:600"> — '+s.nombre+'</span>':'';
+    // mostrar fecha legible
+    var fDisplay=s.fecha||"";
+    if(fDisplay.indexOf("-")===4){
+      var fp=fDisplay.split(" ");var dp=fp[0].split("-");
+      fDisplay=dp[2]+"/"+dp[1]+"/"+dp[0]+(fp[1]?" "+fp[1]:"");
+    }
+    el.innerHTML+=
+      '<div class="history-item">'+
+        '<div style="flex:1;min-width:0">'+
+          '<div class="history-date">'+fDisplay+'</div>'+
+          '<div class="history-svc">'+s.servicio+cn+'</div>'+
+          exStr+
+          '<div style="font-size:11px;color:var(--muted)">Materiales: '+fmt(s.costo||0)+'</div>'+
+        '</div>'+
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-left:10px;flex-shrink:0">'+
+          '<div class="history-gain">+'+fmt(s.ganancia)+'</div>'+
+          '<button class="btn-delete" onclick="borrarServicio('+i+')">🗑️</button>'+
+        '</div>'+
+      '</div>';
+  });
+}
+
+// ─── RENDER STATS ────────────────────────────────────────
+function cambiarMesStats(d){
+  stMes+=d;
+  if(stMes>11){stMes=0;statsAnio++;}
+  if(stMes<0){stMes=11;statsAnio--;}
+  renderStats();
+}
+
+function getDelMes(m,a){
+  return historial.filter(function(h){
+    if(!h.fecha)return false;
+    var p=h.fecha.split(" ")[0].split("-");
+    return parseInt(p[1])-1===m&&parseInt(p[0])===a;
+  });
+}
+
+function renderStats(){
+  var NML=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  var NML_C=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  var ahora=new Date();
+  var esActual=(stMes===ahora.getMonth()&&statsAnio===ahora.getFullYear());
+
+  gs("statsMonthTitle").textContent=NML[stMes]+" "+statsAnio+(esActual?" ✨":"");
+
+  var delMes=getDelMes(stMes,statsAnio);
+  var ganMes=delMes.reduce(function(s,h){return s+(h.ganancia||0);},0);
+  var gastoMes=insMensual.reduce(function(s,i){return s+i.precio;},0);
+  var netMes=ganMes-gastoMes;
+
+  // Conteo servicios del mes
+  var conteoMes={};
+  delMes.forEach(function(h){var s=h.servicio||"Servicio";conteoMes[s]=(conteoMes[s]||0)+1;});
+  var topMes=Object.keys(conteoMes).sort(function(a,b){return conteoMes[b]-conteoMes[a];});
+
+  // Conteo global para ranking
+  var conteo={};
+  historial.forEach(function(h){var s=h.servicio||"Servicio";conteo[s]=(conteo[s]||0)+1;});
+  var top=Object.keys(conteo).sort(function(a,b){return conteo[b]-conteo[a];});
+
+  // ── Gráfico: últimos 6 meses ──
+  var barData=[];
+  for(var i=5;i>=0;i--){
+    var bm=stMes-i; var ba=statsAnio;
+    if(bm<0){bm+=12;ba--;}
+    var bd=getDelMes(bm,ba);
+    var bg=bd.reduce(function(s,h){return s+(h.ganancia||0);},0);
+    barData.push({lbl:NML_C[bm],val:bg,activo:(bm===stMes&&ba===statsAnio)});
+  }
+  var maxVal=Math.max.apply(null,barData.map(function(b){return b.val;}))||1;
+
+  var barsHtml='<div class="bar-chart">';
+  barData.forEach(function(b){
+    var pct=Math.round((b.val/maxVal)*100);
+    var valLbl=b.val>0?("$"+Math.round(b.val/1000)+"k"):"";
+    barsHtml+='<div class="bar-wrap">'+
+      (valLbl?'<span class="bar-val">'+valLbl+'</span>':'')+
+      '<div class="bar'+(b.activo?" activo":"")+'" style="height:'+Math.max(pct,3)+'%"></div>'+
+      '<span class="bar-lbl">'+b.lbl+'</span>'+
+    '</div>';
+  });
+  barsHtml+='</div>';
+
+  var el=gs("statsContent");
+  el.innerHTML=
+    // Big number
+    '<div class="stat-big" style="margin-top:10px">'+
+      '<div class="big-val">'+fmt(ganMes)+'</div>'+
+      '<div class="big-lbl">Ganancia de '+NML[stMes].toLowerCase()+(esActual?" (mes actual)":"")+'</div>'+
+    '</div>'+
+    // 4 mini stats
+    '<div class="stats-duo">'+
+      '<div class="stat-mini"><div class="mini-val">'+delMes.length+'</div><div class="mini-lbl">Servicios</div></div>'+
+      '<div class="stat-mini"><div class="mini-val">'+fmt(delMes.length?Math.round(ganMes/delMes.length):0)+'</div><div class="mini-lbl">Promedio</div></div>'+
+    '</div>'+
+    '<div class="stats-duo">'+
+      '<div class="stat-mini"><div class="mini-val" style="color:var(--danger)">'+fmt(gastoMes)+'</div><div class="mini-lbl">Gasto insumos</div></div>'+
+      '<div class="stat-mini"><div class="mini-val" style="color:'+(netMes>=0?"var(--success)":"var(--danger)")+'">'+fmt(netMes)+'</div><div class="mini-lbl">Neto del mes</div></div>'+
+    '</div>'+
+    // Gráfico
+    '<div class="graph-card">'+
+      '<div class="graph-title">📈 Ganancias — últimos 6 meses</div>'+
+      barsHtml+
+    '</div>';
+
+  // Top servicios del mes
+  if(topMes.length){
+    var h2='<p class="section-title" style="margin-top:4px">🏆 Este mes</p><div class="summary-card">';
+    topMes.slice(0,4).forEach(function(s,i){
+      h2+='<div class="top-svc-item"><span style="font-weight:600">'+(['🥇','🥈','🥉','4️⃣'][i]||'•')+' '+s+'</span><span style="font-weight:800;color:var(--rose)">'+conteoMes[s]+'x · '+fmt(conteoMes[s]*(preciosSvc[s]||0))+'</span></div>';
+    });
+    el.innerHTML+=h2+'</div>';
+  }
+
+  // Top servicios histórico
+  if(top.length){
+    var h3='<p class="section-title" style="margin-top:4px">📋 Histórico</p><div class="summary-card">';
+    top.slice(0,4).forEach(function(s,i){
+      h3+='<div class="top-svc-item"><span style="font-weight:600">'+(['🥇','🥈','🥉','4️⃣'][i]||'•')+' '+s+'</span><span style="font-weight:800;color:var(--mauve)">'+conteo[s]+'x</span></div>';
+    });
+    el.innerHTML+=h3+'</div>';
+  }
+
+  if(!historial.length){
+    el.innerHTML+='<div class="empty-state"><span class="empty-icon">📊</span>Registrá servicios para ver estadísticas</div>';
+  }
+}
+
+// ─── EXPORTAR RESUMEN ────────────────────────────────────
+function exportarResumen(){
+  var NML=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  var delMes=getDelMes(stMes,statsAnio);
+  var ganMes=delMes.reduce(function(s,h){return s+(h.ganancia||0);},0);
+  var gastoMes=insMensual.reduce(function(s,i){return s+i.precio;},0);
+  var netMes=ganMes-gastoMes;
+  var conteoMes={};
+  delMes.forEach(function(h){var s=h.servicio||"Servicio";conteoMes[s]=(conteoMes[s]||0)+1;});
+  var topMes=Object.keys(conteoMes).sort(function(a,b){return conteoMes[b]-conteoMes[a];});
+
+  // Clienta que más gastó
+  var gastoClienta={};
+  delMes.forEach(function(h){if(h.nombre)gastoClienta[h.nombre]=(gastoClienta[h.nombre]||0)+(h.ganancia||0);});
+  var topClienta=Object.keys(gastoClienta).sort(function(a,b){return gastoClienta[b]-gastoClienta[a];})[0];
+
+  var svcsHtml="";
+  topMes.slice(0,3).forEach(function(s){
+    svcsHtml+='<div class="export-row"><span class="export-lbl">'+s+'</span><span class="export-val">'+conteoMes[s]+'x</span></div>';
+  });
+
+  gs("exportCard").innerHTML=
+    '<div style="text-align:center;margin-bottom:20px;">'+
+      '<div style="font-size:32px">💅</div>'+
+      '<div style="font-size:20px;font-weight:900;margin-top:6px;">'+negocio.nombre.replace(/💅/g,"").trim()+'</div>'+
+      '<div style="font-size:12px;opacity:0.6;text-transform:uppercase;letter-spacing:2px;margin-top:4px;">Resumen · '+NML[stMes]+' '+statsAnio+'</div>'+
+    '</div>'+
+    '<div class="export-row"><span class="export-lbl">💰 Ganancia bruta</span><span class="export-val">'+fmt(ganMes)+'</span></div>'+
+    '<div class="export-row"><span class="export-lbl">🧴 Gasto insumos</span><span class="export-val" style="color:#FF8A80;">'+fmt(gastoMes)+'</span></div>'+
+    '<div class="export-row"><span class="export-lbl">✨ Ganancia neta</span><span class="export-val" style="color:'+(netMes>=0?"#A5D6A7":"#FF8A80")+'">'+fmt(netMes)+'</span></div>'+
+    '<div class="export-row"><span class="export-lbl">💅 Servicios</span><span class="export-val">'+delMes.length+'</span></div>'+
+    '<div class="export-row"><span class="export-lbl">📊 Promedio</span><span class="export-val">'+fmt(delMes.length?Math.round(ganMes/delMes.length):0)+'</span></div>'+
+    (topClienta?'<div class="export-row"><span class="export-lbl">⭐ Top clienta</span><span class="export-val" style="font-size:12px">'+topClienta+'</span></div>':'')+
+    (svcsHtml?'<div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.15)"><div style="font-size:10px;opacity:0.6;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Servicios realizados</div>'+svcsHtml+'</div>':'')+
+    '<div style="text-align:center;margin-top:18px;font-size:10px;opacity:0.4;">'+negocio.sub+'</div>';
+
+  gs("modalExport").classList.add("show");
+}
+
+// ─── RENDER TURNOS ───────────────────────────────────────
+function renderTurnos(){
+  var p2=diaSelected.split("-");
+  var dObj=new Date(parseInt(p2[0]),parseInt(p2[1])-1,parseInt(p2[2]));
+  var ND=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+  var NML2=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  gs("agendaTitle").textContent="📅 "+ND[dObj.getDay()]+" "+dObj.getDate()+" de "+NML2[dObj.getMonth()];
+  var del=turnos.filter(function(t){return t.fecha===diaSelected;});
+  del.sort(function(a,b){return a.hora>b.hora?1:-1;});
+  var el=gs("listaTurnos");
+  if(!del.length){el.innerHTML='<div class="empty-state"><span class="empty-icon">📭</span>Sin turnos este día</div>';}
+  else {
+    el.innerHTML="";
+    del.forEach(function(t){
+      var idx=turnos.indexOf(t);
+      var sb=t.senia>0?'<span class="senia-badge">💰 Seña: '+fmt(t.senia)+'</span>':'';
+      var exBdg=(t.extras||[]).map(function(e){return'<span class="turno-extra-badge">'+e.nombre+(e.cant>1?" x"+e.cant:"")+'</span>';}).join("");
+      el.innerHTML+=
+        '<div class="turno-card'+(t.realizado?" realizado":"")+'">'+
+          '<div class="turno-header"><span class="turno-nombre">👩 '+t.nombre+'</span><span class="turno-precio">'+fmt(t.precio||0)+'</span></div>'+
+          '<div class="turno-info"><span class="turno-chip">⏰ '+fmtHora(t.hora)+'</span><span class="turno-svc">'+t.servicio+'</span>'+exBdg+sb+'</div>'+
+          '<div class="turno-actions">'+
+            (t.realizado
+              ?'<button class="btn-realizado" disabled>✓ Realizado</button>'
+              :'<button class="btn-realizado" onclick="marcarRealizado('+idx+')">✓ Realizado</button>'+
+               '<button class="btn-edit-t" onclick="abrirModal('+idx+')">✏️</button>')+
+            '<button class="btn-eliminar-t" onclick="eliminarTurno('+idx+')">🗑</button>'+
+          '</div></div>';
+    });
+  }
+  renderListaEspera();
+}
+
+// ─── LISTA DE ESPERA ─────────────────────────────────────
+function getEsperaDia(fecha){return listaEspera[fecha]||[];}
+
+function renderListaEspera(){
+  var sec=gs("listaEsperaSection");
+  if(!sec)return;
+  var lista=getEsperaDia(diaSelected);
+  if(!lista.length){
+    sec.innerHTML='<div class="espera-section"><button onclick="abrirModalEspera()" style="width:100%;padding:11px;border:1.5px dashed var(--warn);background:transparent;border-radius:12px;font-size:13px;font-weight:700;color:var(--warn);cursor:pointer;">⏳ + Agregar a lista de espera</button></div>';
+    return;
+  }
+  var h='<div class="espera-section">'+
+    '<div class="espera-header">'+
+      '<span class="espera-title">⏳ Lista de espera <span class="espera-badge">'+lista.length+'</span></span>'+
+      '<button onclick="abrirModalEspera()" style="background:var(--warn);color:white;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">+ Agregar</button>'+
+    '</div>';
+  lista.forEach(function(e,i){
+    var wspBtn=e.telefono?'<button class="btn-espera-wsp" onclick="wsppEspera(\''+diaSelected+'\','+i+')" title="WhatsApp">💬</button>':'';
+    h+='<div class="espera-card">'+
+      '<div class="espera-pos">'+(i+1)+'</div>'+
+      '<div class="espera-info">'+
+        '<div class="espera-nombre">'+e.nombre+'</div>'+
+        '<div class="espera-nota">'+(e.servicio&&e.servicio!=="Sin definir"?e.servicio:"")+(e.nota?' · '+e.nota:'')+(e.telefono?' · 📞 '+e.telefono:'')+'</div>'+
+      '</div>'+
+      '<div class="espera-actions">'+
+        wspBtn+
+        '<button class="btn-espera-turno" onclick="pasarEsperaATurno(\''+diaSelected+'\','+i+')" title="Convertir en turno">📅</button>'+
+        '<button class="btn-espera-del" onclick="eliminarEspera(\''+diaSelected+'\','+i+')">✕</button>'+
+      '</div>'+
+    '</div>';
+  });
+  h+='</div>';
+  sec.innerHTML=h;
+}
+
+function abrirModalEspera(){
+  var NML2=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  var p2=diaSelected.split("-");
+  var dObj=new Date(parseInt(p2[0]),parseInt(p2[1])-1,parseInt(p2[2]));
+  var ND=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+  gs("esperaDiaLabel").textContent=ND[dObj.getDay()]+" "+dObj.getDate()+" de "+NML2[dObj.getMonth()];
+  gs("eNombre").value="";gs("eTelefono").value="";gs("eNota").value="";gs("eServicio").selectedIndex=0;
+  gs("modalEspera").classList.add("show");
+}
+
+function guardarEspera(){
+  var n=gs("eNombre").value.trim();
+  if(!n){showToast("⚠️ Ingresá un nombre");return;}
+  if(!listaEspera[diaSelected])listaEspera[diaSelected]=[];
+  listaEspera[diaSelected].push({
+    nombre:n,
+    telefono:gs("eTelefono").value.trim(),
+    servicio:gs("eServicio").value,
+    nota:gs("eNota").value.trim(),
+    agregada:hoy()
+  });
+  guardar();
+  gs("modalEspera").classList.remove("show");
+  renderListaEspera();
+  showToast("⏳ "+n+" agregada a la lista de espera");
+}
+
+function eliminarEspera(fecha,idx){
+  if(!listaEspera[fecha])return;
+  var nombre=listaEspera[fecha][idx].nombre;
+  listaEspera[fecha].splice(idx,1);
+  if(!listaEspera[fecha].length)delete listaEspera[fecha];
+  guardar();renderListaEspera();
+  showToast("🗑 "+nombre+" eliminada de la lista");
+}
+
+function pasarEsperaATurno(fecha,idx){
+  var e=listaEspera[fecha][idx];
+  // Eliminar de la espera
+  listaEspera[fecha].splice(idx,1);
+  if(!listaEspera[fecha].length)delete listaEspera[fecha];
+  guardar();
+  // Abrir modal de turno pre-completado
+  gs("modalEspera").classList.remove("show");
+  abrirModal(-1);
+  gs("tNombre").value=e.nombre;
+  gs("tFecha").value=fecha;
+  // Pre-seleccionar servicio si existe
+  var sel=gs("tServicio");
+  for(var j=0;j<sel.options.length;j++){
+    if(sel.options[j].value===e.servicio){sel.selectedIndex=j;break;}
+  }
+  onTSvcChange();
+  renderListaEspera();
+  showToast("📅 Convirtiendo turno para "+e.nombre);
+}
+
+function wsppEspera(fecha,idx){
+  var e=listaEspera[fecha][idx];
+  if(!e||!e.telefono)return;
+  var NML2=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  var fp=fecha.split("-");
+  var fechaLbl=fp[2]+" de "+NML2[parseInt(fp[1])-1];
+  var msg="Hola "+e.nombre.split(" ")[0]+" 💅\n"
+    +"¡Se liberó un turno para el "+fechaLbl+"!\n"
+    +"¿Te viene bien? Avisame así te lo agendo 🌸";
+  var tel=e.telefono.replace(/\D/g,"");
+  window.open("https://wa.me/54"+tel+"?text="+encodeURIComponent(msg),"_blank");
+}
+
+function checkNotifDot(){
+  gs("notifDot").style.display=turnos.some(function(t){return t.fecha===hoy()&&!t.realizado;})?"block":"none";
+}
+
+// ─── MODAL ───────────────────────────────────────────────
+var _editIdx=-1;
+function abrirModal(idx){
+  _editIdx=idx;resetExtrasForm("t");
+  if(idx===-1){
+    gs("modalTitulo").textContent="💅 Nuevo Turno";
+    gs("btnGuardar").textContent="Guardar turno 📅";
+    gs("tFecha").value=diaSelected;
+    var d=new Date();_h=d.getHours()%12||12;_m=d.getMinutes();_ap=d.getHours()>=12?"PM":"AM";
+    gs("tNombre").value="";
+    gs("tServicio").selectedIndex=0;
+    gs("tPrecio").value=preciosSvc[gs("tServicio").value]||0;
+    gs("tSenia").value="";
+  } else {
+    var t=turnos[idx];
+    gs("modalTitulo").textContent="✏️ Editar Turno";
+    gs("btnGuardar").textContent="Guardar cambios ✓";
+    gs("tFecha").value=t.fecha;
+    setHora(t.hora);
+    gs("tNombre").value=t.nombre;
+    var sel=gs("tServicio");
+    for(var j=0;j<sel.options.length;j++){if(sel.options[j].value===t.servicio){sel.selectedIndex=j;break;}}
+    var exTotal=(t.extras||[]).reduce(function(s,e){return s+e.precio*e.cant;},0);
+    gs("tPrecio").value=(t.precio||0)-exTotal;
+    gs("tSenia").value=t.senia||"";
+    (t.extras||[]).forEach(function(e){
+      if(e.nombre==="Retirado"){var el=gs("t_ret");if(el)el.checked=true;}
+      if(e.nombre==="Retirado otro salón"){var el=gs("t_reto");if(el)el.checked=true;}
+      if(e.nombre==="Arreglo por uña"){var el=gs("t_arr");if(el)el.checked=true;setUnas("t",e.cant);}
+    });
+  }
+  syncHora();calcTotalTurno();
+  gs("modalTurno").classList.add("show");
+}
+function cerrarModal(){gs("modalTurno").classList.remove("show");}
+
+function guardarTurno(){
+  var f=gs("tFecha").value,n=gs("tNombre").value.trim();
+  if(!f||!n){showToast("⚠️ Completá fecha y nombre");return;}
+  var s=gs("tServicio").value;
+  var base=parseFloat(gs("tPrecio").value)||0;
+  var se=parseFloat(gs("tSenia").value)||0;
+  var extras=getExtrasData("t");
+  var exTotal=extras.reduce(function(a,e){return a+e.precio*e.cant;},0);
+  var precio=base+exTotal;
+  var obj={fecha:f,hora:getHora24(),nombre:n,servicio:s,precio:precio,senia:se,extras:extras,realizado:false};
+  if(_editIdx>=0){obj.realizado=turnos[_editIdx].realizado;turnos[_editIdx]=obj;showToast("✅ Turno actualizado!");}
+  else{turnos.push(obj);showToast("📅 Turno agendado: "+n);}
+  // Ir a la semana del turno agendado
+  var fp=f.split("-");
+  var kDate=new Date(parseInt(fp[0]),parseInt(fp[1])-1,parseInt(fp[2]));kDate.setHours(0,0,0,0);
+  var dow=kDate.getDay();var diff=dow===0?-6:1-dow;
+  semanaBase=new Date(kDate);semanaBase.setDate(semanaBase.getDate()+diff);
+  // Agregar clienta si no existe
+  if(!Array.isArray(clientas)) clientas=[];
+  var nLow=n.toLowerCase();
+  var yaExiste=clientas.some(function(c){return c.nombre&&c.nombre.trim().toLowerCase()===nLow;});
+  if(!yaExiste){
+    clientas.push({nombre:n,telefono:"",notas:"",recordatorio:1,creada:hoy()});
+  }
+  // Guardar todo junto
+  lsSave("turnos",turnos);
+  lsSave("clientas",clientas);
+  guardar();
+  mostrar();renderSemana();renderTurnos();cerrarModal();
+}
+
+function marcarRealizado(i){
+  var nombre=turnos[i].nombre;
+  turnos[i].realizado=true;
+  var p=turnos[i].precio||0,se=turnos[i].senia||0;
+  ganancia+=p;
+  var now=new Date();
+  var dd=pad(now.getDate()),mm=pad(now.getMonth()+1),yyyy=now.getFullYear();
+  var fecha=yyyy+"-"+mm+"-"+dd+" "+pad(now.getHours())+":"+pad(now.getMinutes());
+  historial.push({fecha:fecha,servicio:turnos[i].servicio,nombre:nombre,precio:p,costo:0,ganancia:p,extras:turnos[i].extras||[],senia:se});
+  // Asegurar que la clienta existe
+  if(!Array.isArray(clientas)) clientas=[];
+  var nLow=nombre.trim().toLowerCase();
+  var yaExiste=clientas.some(function(c){return c.nombre&&c.nombre.trim().toLowerCase()===nLow;});
+  if(!yaExiste){
+    clientas.push({nombre:nombre.trim(),telefono:"",notas:"",recordatorio:1,creada:hoy()});
+  }
+  lsSave("clientas",clientas);
+  descontarConsumiblesPorServicio();
+  guardar();mostrar();renderSemana();renderTurnos();renderHistorial();renderStats();
+  showToast(se>0?"✅ +"+fmt(p)+" (Seña: "+fmt(se)+" · Resto: "+fmt(p-se)+") 🎉":"✅ +"+fmt(p)+" sumado! 🎉");
+}
+function eliminarTurno(i){turnos.splice(i,1);guardar();mostrar();renderSemana();renderTurnos();showToast("🗑 Eliminado");}
+
+// ─── RENDER INICIO ───────────────────────────────────────
+function mostrar(){
+  var tU=invUnica.reduce(function(s,i){return s+i.precio;},0);
+  var tM=insMensual.reduce(function(s,i){return s+i.precio;},0);
+  var tI=tU+tM;var pct=tI>0?Math.min(100,Math.round(ganancia/tI*100)):0;var falta=Math.max(0,tI-ganancia);
+  gs("statsRow").innerHTML=
+    '<div class="stat-card"><div class="lbl">Invertido</div><div class="val">'+fmt(tI)+'</div></div>'+
+    '<div class="stat-card"><div class="lbl">Ganado</div><div class="val">'+fmt(ganancia)+'</div></div>'+
+    '<div class="stat-card"><div class="lbl">Servicios</div><div class="val">'+historial.length+'</div></div>';
+  gs("progressCard").innerHTML=
+    '<div class="feat-header"><span class="feat-title">Recuperación</span><span class="feat-pct">'+pct+'%</span></div>'+
+    '<div class="prog-bg"><div class="prog-fill" style="width:'+pct+'%"></div></div>'+
+    '<p class="feat-sub">'+(falta>0?"Faltan "+fmt(falta)+" para recuperar 💪":"¡Inversión recuperada! 🎉✨")+'</p>';
+  gs("resumenCard").innerHTML=
+    '<div class="summary-row"><span class="summary-label">🛠 Inversión única</span><span class="summary-val">'+fmt(tU)+'</span></div>'+
+    '<div class="summary-row"><span class="summary-label">🧴 Insumos mensuales</span><span class="summary-val">'+fmt(tM)+'</span></div>'+
+    '<div class="summary-row"><span class="summary-label">📦 Total invertido</span><span class="summary-val" style="color:var(--mauve)">'+fmt(tI)+'</span></div>'+
+    '<div class="summary-row"><span class="summary-label">✨ Ganancia acumulada</span><span class="summary-val" style="color:var(--success)">'+fmt(ganancia)+'</span></div>'+
+    '<div class="summary-row"><span class="summary-label">💅 Servicios realizados</span><span class="summary-val" style="color:var(--rose)">'+historial.length+'</span></div>'+
+    '<div class="summary-row"><span class="summary-label">💰 Falta recuperar</span><span class="summary-val" style="color:var(--danger)">'+fmt(falta)+'</span></div>';
+  renderPrecios();renderConsumibles();renderInversion();checkNotifDot();
+}
+
+// ─── RENDER PRECIOS ──────────────────────────────────────
+function renderPrecios(){
+  var el=gs("preciosCard"),h='<div class="precio-section-lbl">Servicios principales</div>';
+  ["Capping gel","Capping poly gel","Esculpidas polygel","Semipermanente"].forEach(function(n){
+    h+='<div class="precio-row"><span style="font-size:13px;font-weight:600">'+n+'</span>'+
+      '<div style="display:flex;align-items:center;gap:4px"><span style="font-size:12px;color:var(--muted)">$</span>'+
+      '<input class="precio-inp" type="number" value="'+(preciosSvc[n]||0)+'" onchange="preciosSvc[\''+n+'\']=parseFloat(this.value)||0;guardar();showToast(\'💲 Actualizado\')"></div></div>';
+  });
+  h+='<div class="precio-section-lbl" style="margin-top:10px">✨ Extras</div>';
+  [["Retirado","Retirado"],["Retirado otro salon","Retirado otro salón"],["Arreglo por una","Arreglo por uña"]].forEach(function(e){
+    h+='<div class="precio-row"><span style="font-size:13px;font-weight:600">'+e[1]+'</span>'+
+      '<div style="display:flex;align-items:center;gap:4px"><span style="font-size:12px;color:var(--muted)">$</span>'+
+      '<input class="precio-inp extra" type="number" value="'+(preciosExt[e[0]]||0)+'" onchange="preciosExt[\''+e[0]+'\']=parseFloat(this.value)||0;guardar();showToast(\'💲 Actualizado\')"></div></div>';
+  });
+  h+='<p style="font-size:11px;color:var(--muted);text-align:center;padding:10px 0">Cambios aplican al próximo registro</p>';
+  el.innerHTML=h;
+}
+
+// ─── CONSUMIBLES POR SERVICIO ────────────────────────────
+function renderConsumibles(){
+  var el=gs("consumiblesCard");
+  if(!el)return;
+  if(!insMensual.length){
+    el.innerHTML='<div style="font-size:13px;color:var(--muted);text-align:center;padding:12px 0;">Primero agregá insumos en la pestaña 📦 Stock</div>';
+    return;
+  }
+
+  var html='';
+  insMensual.forEach(function(item,i){
+    // buscar si este insumo ya está en consumiblesSvc
+    var cfg=consumiblesSvc.find(function(c){return c.nombre===item.nombre;});
+    if(!cfg){cfg={nombre:item.nombre,cant:1,activo:false};consumiblesSvc.push(cfg);}
+    var stockActual=item.stock||0;
+    var stockBajo=cfg.activo&&stockActual<=(item.stockMin||1);
+    html+=
+      '<div class="consumible-row">'+
+        '<input type="checkbox" class="consumible-check" id="chk_cons_'+i+'" '+(cfg.activo?'checked':'')+
+          ' onchange="toggleConsumible(\''+item.nombre+'\',this.checked)">'+
+        '<span class="consumible-name">'+item.nombre+
+          (stockBajo?'<span style="color:var(--danger);font-size:10px;margin-left:5px;"> ⚠️</span>':'')+
+        '</span>'+
+        '<input type="number" class="consumible-cant" id="cant_cons_'+i+'" value="'+cfg.cant+'" min="1"'+
+          ' onchange="setCantConsumible(\''+item.nombre+'\',this.value)">'+
+        '<span class="consumible-unit">u · stock: <strong style="color:'+(stockBajo?'var(--danger)':'inherit')+'">'+stockActual+'</strong></span>'+
+      '</div>';
+  });
+  // Limpiar consumibles huérfanos (insumos eliminados)
+  var nombresActuales=insMensual.map(function(x){return x.nombre;});
+  consumiblesSvc=consumiblesSvc.filter(function(c){return nombresActuales.indexOf(c.nombre)>=0;});
+
+  el.innerHTML=html;
+  renderConsumiblesAviso();
+}
+
+function toggleConsumible(nombre,activo){
+  var cfg=consumiblesSvc.find(function(c){return c.nombre===nombre;});
+  if(!cfg){cfg={nombre:nombre,cant:1,activo:false};consumiblesSvc.push(cfg);}
+  cfg.activo=activo;
+  guardar();
+  renderConsumiblesAviso();
+}
+
+function setCantConsumible(nombre,val){
+  var cfg=consumiblesSvc.find(function(c){return c.nombre===nombre;});
+  if(!cfg){cfg={nombre:nombre,cant:1,activo:false};consumiblesSvc.push(cfg);}
+  cfg.cant=Math.max(1,parseInt(val)||1);
+  guardar();
+}
+
+function renderConsumiblesAviso(){
+  var el=gs("consumiblesAvisoStockBajo");
+  if(!el)return;
+  var bajos=consumiblesSvc.filter(function(c){
+    if(!c.activo)return false;
+    var item=insMensual.find(function(x){return x.nombre===c.nombre;});
+    return item&&(item.stock||0)<=(item.stockMin||1);
+  });
+  if(bajos.length){
+    el.style.display="block";
+    el.innerHTML="⚠️ Stock bajo en: "+bajos.map(function(c){return "<strong>"+c.nombre+"</strong>";}).join(", ")+".";
+  } else {
+    el.style.display="none";
+  }
+}
+
+function descontarConsumiblesPorServicio(){
+  // Recargar siempre desde storage para tener la config más reciente
+  consumiblesSvc=lsParse("consumiblesSvc")||[];
+  var activos=consumiblesSvc.filter(function(c){return c.activo;});
+  if(!activos.length)return;
+  var descontados=[];
+  var avisos=[];
+  activos.forEach(function(c){
+    var item=insMensual.find(function(x){return x.nombre===c.nombre;});
+    if(!item)return;
+    var antes=item.stock||0;
+    item.stock=Math.max(0,antes-c.cant);
+    descontados.push(c.nombre+" -"+c.cant);
+    if(item.stock<=(item.stockMin||1)){
+      avisos.push(item.nombre+" (quedan "+item.stock+")");
+    }
+  });
+  if(descontados.length){
+    guardar();
+    renderConsumiblesAviso();
+    // Actualizar el panel de stock si está visible
+    renderInversion();
+    // Toast principal con lo descontado
+    setTimeout(function(){
+      showToast("📦 Stock: "+descontados.join(" · "));
+    },800);
+    // Toast de aviso si hay stock bajo
+    if(avisos.length){
+      setTimeout(function(){
+        showToast("⚠️ Stock bajo: "+avisos.join(", "));
+      },2400);
+    }
+  }
+}
+function getTotalGastoRecargas(){
+  return insMensual.reduce(function(s,i){return s+(i.gastoAcum||0);},0);
+}
+
+function renderInversion(){
+  var tU=invUnica.reduce(function(s,i){return s+i.precio;},0);
+  var tM=insMensual.reduce(function(s,i){return s+i.precio;},0);
+  var tGasto=getTotalGastoRecargas();
+  gs("badgeUnica").textContent=invUnica.length;gs("badgeMensual").textContent=insMensual.length;
+
+  // Panel gasto acumulado
+  var gastoEl=gs("stockGastoTotal");
+  if(gastoEl){
+    if(insMensual.length&&tGasto>0){
+      gastoEl.style.display="flex";
+      gs("stockGastoVal").textContent=fmt(tGasto);
+    } else {
+      gastoEl.style.display="none";
+    }
+  }
+
+  // Lista inversión única
+  var luEl=gs("listaUnica");
+  luEl.innerHTML=invUnica.length?"":'<div class="empty-state"><span class="empty-icon">🛠</span>No hay items</div>';
+  invUnica.forEach(function(item,i){
+    luEl.innerHTML+='<div class="list-item"><span class="list-item-name">'+item.nombre+'</span>'+
+      '<div class="list-item-right"><span class="list-item-price">'+fmt(item.precio)+'</span>'+
+      '<button class="btn-sm btn-edit-stock" onclick="abrirEditUnica('+i+')" style="background:#EEE6FF;color:#6B46C1;margin-right:4px;">✏️</button>'+
+      '<button class="btn-delete" onclick="eliminarUnica('+i+')">✕</button></div></div>';
+  });
+  gs("totalUnicaRow").style.display=invUnica.length?"flex":"none";gs("totalUnica").textContent=fmt(tU);
+
+  // Alertas stock bajo
+  var aEl=gs("alertasStock");aEl.innerHTML="";
+  insMensual.forEach(function(item){
+    if((item.stock||0)<=(item.stockMin||1))
+      aEl.innerHTML+='<div class="warn-alert">⚠️ Stock bajo: <strong>'+item.nombre+'</strong> (quedan '+item.stock+')</div>';
+  });
+
+  // Lista insumos mensuales
+  var lmEl=gs("listaMensual");
+  lmEl.innerHTML=insMensual.length?"":'<div class="empty-state"><span class="empty-icon">🧴</span>No hay insumos</div>';
+  insMensual.forEach(function(item,i){
+    var s=item.stock||0,sm=item.stockMin||1;
+    var pct2=Math.min(100,Math.round(s/Math.max(s,sm*2)*100));
+    var cls=s<=0?"stock-danger":s<=sm?"stock-warn":"stock-ok";
+    var lbl=s<=0?"Sin stock":s<=sm?"Bajo":"OK";
+    var col=s<=0?"var(--danger)":s<=sm?"var(--warn)":"var(--success)";
+    var gastoAcum=item.gastoAcum||0;
+    var gastoChip=gastoAcum>0?'<span class="gasto-acum-chip">💸 Gastado: '+fmt(gastoAcum)+'</span>':'';
+    // Historial de últimas recargas con botón borrar
+    var histHtml='';
+    if(item.recargas&&item.recargas.length){
+      var ultimas=item.recargas.slice(-4).reverse();
+      var uxcDisp=item.unidadxCaja||1;
+      histHtml='<div class="stock-recarga-hist">';
+      ultimas.forEach(function(r,ri){
+        var realIdx=item.recargas.length-1-(ri); // index from end
+        var cantLabel=uxcDisp>1?(r.cajas||1)+' caja'+(r.cajas>1?'s':'')+' ('+r.cant+'u)':'+'+r.cant+'u';
+        histHtml+='<div class="recarga-row">'+
+          '<span>📅 '+r.fecha+' · '+cantLabel+'</span>'+
+          '<span style="display:flex;align-items:center;gap:8px;">'+
+            '<span>'+fmt(r.precio)+'/caja · <strong>'+fmt(r.total)+'</strong></span>'+
+            '<button onclick="borrarRecarga('+i+','+realIdx+')" style="background:#FDEAEA;color:var(--danger);border:none;border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700;cursor:pointer;">✕</button>'+
+          '</span>'+
+        '</div>';
+      });
+      histHtml+='</div>';
+    }
+    var uxc=item.unidadxCaja||1;
+    var uxcBadge=uxc>1?'<span style="font-size:10px;background:#E8EAF6;color:#3949AB;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px;">📦 '+uxc+' u/caja</span>':'';
+    lmEl.innerHTML+='<div class="stock-item">'+
+      '<div class="stock-header"><span class="stock-name">'+item.nombre+uxcBadge+'</span><span class="stock-badge '+cls+'">'+lbl+'</span></div>'+
+      '<div class="stock-bar-bg"><div class="stock-bar-fill" style="width:'+pct2+'%;background:'+col+'"></div></div>'+
+      '<div class="stock-meta"><span>Stock: <strong>'+s+'</strong> / Mín: '+sm+'</span><span class="stock-precio-actual">Precio actual: '+fmt(item.precio)+'</span></div>'+
+      gastoChip+
+      histHtml+
+      '<div class="stock-item-actions">'+
+        '<button class="btn-sm btn-rose" style="flex:2;color:white;background:linear-gradient(135deg,var(--rose-d),var(--rose-l))" onclick="abrirRestock('+i+')">+ Agregar stock</button>'+
+        '<button class="btn-sm" style="flex:1;background:#F5EEF1;color:var(--text)" onclick="bajarStock('+i+')">− Stock</button>'+
+        '<button class="btn-sm btn-edit-stock" onclick="abrirEditStock('+i+')">✏️</button>'+
+      '</div></div>';
+  });
+  gs("totalMensualRow").style.display=insMensual.length?"flex":"none";gs("totalMensual").textContent=fmt(tM);
+}
+
+// ── Restock modal ──
+var _restockIdx=-1,_restockCant=1;
+function abrirRestock(i){
+  _restockIdx=i;_restockCant=1;
+  var item=insMensual[i];
+  var uxc=item.unidadxCaja||1;
+  gs("restockNombreLbl").textContent=item.nombre+' · Stock actual: '+item.stock+' unidades';
+  gs("restockCantDisp").textContent=1;
+  gs("restockPrecio").value=item.precio||"";
+  // Mostrar info caja si aplica
+  var cajaInfo=gs("restockCajaInfo");
+  if(uxc>1){
+    cajaInfo.style.display="block";
+    gs("restockCajaUnid").textContent=uxc;
+    gs("restockUnidTotal").textContent="= "+uxc+" unidades";
+    gs("restockCantLabel").textContent="¿Cuántas cajas/paquetes comprás?";
+  } else {
+    cajaInfo.style.display="none";
+    gs("restockUnidTotal").textContent="";
+    gs("restockCantLabel").textContent="¿Cuántas unidades comprás?";
+  }
+  actualizarRestockPreview();
+  gs("modalRestock").classList.add("show");
+}
+function restockCambiarCant(d){
+  _restockCant=Math.max(1,_restockCant+d);
+  gs("restockCantDisp").textContent=_restockCant;
+  var uxc=(_restockIdx>=0?(insMensual[_restockIdx].unidadxCaja||1):1);
+  var totalUnid=_restockCant*uxc;
+  gs("restockUnidTotal").textContent=uxc>1?"= "+totalUnid+" unidades":"";
+  actualizarRestockPreview();
+}
+function actualizarRestockPreview(){
+  var precio=parseFloat(gs("restockPrecio").value)||0;
+  var prev=gs("restockGastoPreview");
+  if(precio>0&&_restockIdx>=0){
+    var item=insMensual[_restockIdx];
+    var uxc=item.unidadxCaja||1;
+    var totalUnid=_restockCant*uxc;
+    var precioPorUnidad=uxc>1?precio/uxc:precio; // precio por caja / unidades en la caja
+    var acum=(item.gastoAcum||0)+precio*_restockCant;
+    gs("restockGastoAmt").textContent=fmt(precio*_restockCant);
+    gs("restockPrecioUnid").textContent=fmt(precioPorUnidad)+' por unidad'+(uxc>1?' ('+totalUnid+'u total)':'');
+    gs("restockGastoAcum").textContent=fmt(acum);
+    prev.style.display="block";
+  } else {
+    prev.style.display="none";
+  }
+}
+// restockPrecio oninput is set via HTML attribute
+
+function confirmarRestock(){
+  if(_restockIdx<0)return;
+  var precio=parseFloat(gs("restockPrecio").value)||0;
+  if(precio<=0){showToast("⚠️ Ingresá el precio de esta compra");return;}
+  var item=insMensual[_restockIdx];
+  var uxc=item.unidadxCaja||1;
+  var cajasCompradas=_restockCant;
+  var unidadesTotal=cajasCompradas*uxc;
+  var totalGastado=precio*cajasCompradas; // precio es por caja
+  var precioPorUnidad=totalGastado/unidadesTotal;
+  // Actualizar stock (en unidades)
+  item.stock=(item.stock||0)+unidadesTotal;
+  // Actualizar precio actual (guardamos precio por caja)
+  item.precio=precio;
+  // Acumular gasto
+  item.gastoAcum=(item.gastoAcum||0)+totalGastado;
+  // Guardar historial de recarga
+  if(!item.recargas)item.recargas=[];
+  var hoyStr=hoy();var dp=hoyStr.split("-");
+  item.recargas.push({fecha:dp[2]+"/"+dp[1]+"/"+dp[0],cant:unidadesTotal,cajas:cajasCompradas,precio:precio,precioUnidad:precioPorUnidad,total:totalGastado});
+  guardar();renderInversion();mostrar();
+  gs("modalRestock").classList.remove("show");
+  showToast("✅ +"+unidadesTotal+(uxc>1?" unidades ("+cajasCompradas+" caja"+(cajasCompradas>1?"s":"")+")":" u")+" · "+fmt(totalGastado));
+}
+
+function borrarRecarga(itemIdx, recargaIdx){
+  var item=insMensual[itemIdx];
+  if(!item||!item.recargas||!item.recargas[recargaIdx])return;
+  var r=item.recargas[recargaIdx];
+  // Descontar del gasto acumulado
+  item.gastoAcum=Math.max(0,(item.gastoAcum||0)-r.total);
+  // Descontar del stock
+  item.stock=Math.max(0,(item.stock||0)-r.cant);
+  // Eliminar la entrada
+  item.recargas.splice(recargaIdx,1);
+  guardar();renderInversion();mostrar();
+  showToast("🗑 Compra eliminada · Stock y gasto actualizados");
+}
+
+function bajarStock(i){
+  insMensual[i].stock=Math.max(0,(insMensual[i].stock||0)-1);
+  guardar();renderInversion();
+  if(insMensual[i].stock<=(insMensual[i].stockMin||1))showToast("⚠️ Stock bajo: "+insMensual[i].nombre);
+}
+
+// ── Edit insumo modal ──
+function abrirEditStock(i){
+  var item=insMensual[i];
+  gs("editStockIdx").value=i;
+  gs("editStockNombre").value=item.nombre;
+  gs("editStockPrecio").value=item.precio||0;
+  gs("editStockMin").value=item.stockMin||1;
+  gs("editStockCant").value=item.stock||0;
+  gs("editStockUnidadxCaja").value=item.unidadxCaja||1;
+  gs("modalEditStock").classList.add("show");
+}
+function guardarEditStock(){
+  var i=parseInt(gs("editStockIdx").value);
+  var n=gs("editStockNombre").value.trim();
+  var p=parseFloat(gs("editStockPrecio").value)||0;
+  var sm=parseInt(gs("editStockMin").value)||1;
+  var sc=parseInt(gs("editStockCant").value)||0;
+  var uxc=parseInt(gs("editStockUnidadxCaja").value)||1;
+  if(!n){showToast("⚠️ Ingresá un nombre");return;}
+  insMensual[i].nombre=n;
+  insMensual[i].precio=p;
+  insMensual[i].stockMin=sm;
+  insMensual[i].stock=sc;
+  insMensual[i].unidadxCaja=uxc;
+  guardar();mostrar();gs("modalEditStock").classList.remove("show");showToast("✅ Insumo actualizado");
+}
+function eliminarMensualModal(){
+  var i=parseInt(gs("editStockIdx").value);
+  insMensual.splice(i,1);guardar();mostrar();gs("modalEditStock").classList.remove("show");showToast("🗑 Eliminado");
+}
+
+// ── Edit única modal ──
+function abrirEditUnica(i){
+  var item=invUnica[i];
+  gs("editUnicaIdx").value=i;
+  gs("editUnicaNombre").value=item.nombre;
+  gs("editUnicaPrecio").value=item.precio||0;
+  gs("modalEditUnica").classList.add("show");
+}
+function guardarEditUnica(){
+  var i=parseInt(gs("editUnicaIdx").value);
+  var n=gs("editUnicaNombre").value.trim();
+  var p=parseFloat(gs("editUnicaPrecio").value)||0;
+  if(!n){showToast("⚠️ Ingresá un nombre");return;}
+  invUnica[i].nombre=n;invUnica[i].precio=p;
+  guardar();mostrar();gs("modalEditUnica").classList.remove("show");showToast("✅ Actualizado");
+}
+function eliminarUnicaModal(){
+  var i=parseInt(gs("editUnicaIdx").value);
+  invUnica.splice(i,1);guardar();mostrar();gs("modalEditUnica").classList.remove("show");showToast("🗑 Eliminado");
+}
+
+function agregarUnica(){var n=gs("nombreUnica").value.trim(),p=parseFloat(gs("precioUnica").value);if(!n||isNaN(p)||p<=0){showToast("⚠️ Completá nombre y precio");return;}invUnica.push({nombre:n,precio:p});gs("nombreUnica").value="";gs("precioUnica").value="";guardar();mostrar();showToast("✅ Item agregado");}
+function eliminarUnica(i){invUnica.splice(i,1);guardar();mostrar();showToast("🗑 Eliminado");}
+function agregarMensual(){
+  var n=gs("nombreMensual").value.trim();
+  var p=parseFloat(gs("precioMensual").value);
+  var sa=parseInt(gs("stockActual").value)||1;
+  var sm=parseInt(gs("stockMin").value)||1;
+  var uxc=parseInt(gs("unidadxCajaMensual").value)||1;
+  if(!n||isNaN(p)||p<=0){showToast("⚠️ Completá nombre y precio");return;}
+  var unidadesTotales=sa*uxc;
+  var gastoInicial=p*sa;
+  var dp=hoy().split("-");var fechaHoy=dp[2]+"/"+dp[1]+"/"+dp[0];
+  insMensual.push({
+    nombre:n,precio:p,stock:unidadesTotales,stockMin:sm,
+    unidadxCaja:uxc,gastoAcum:gastoInicial,
+    recargas:[{fecha:fechaHoy,cant:unidadesTotales,cajas:sa,precio:p,precioUnidad:p/uxc,total:gastoInicial}]
+  });
+  gs("nombreMensual").value="";gs("precioMensual").value="";gs("stockActual").value="";gs("stockMin").value="";gs("unidadxCajaMensual").value="";
+  guardar();mostrar();showToast("✅ Insumo agregado");
+}
+function eliminarMensual(i){insMensual.splice(i,1);guardar();mostrar();showToast("🗑 Eliminado");}
+function ajustarStock(i,d){insMensual[i].stock=Math.max(0,(insMensual[i].stock||0)+d);guardar();renderInversion();if(insMensual[i].stock<=(insMensual[i].stockMin||1))showToast("⚠️ Stock bajo: "+insMensual[i].nombre);}
+
+// ─── TABS ────────────────────────────────────────────────
+function showTab(name){
+  document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active");});
+  document.querySelectorAll(".tab-btn").forEach(function(b){b.classList.remove("active");});
+  gs("page-"+name).classList.add("active");
+  gs("tab-"+name).classList.add("active");
+  if(name==="stats"){renderStats();}
+  if(name==="agenda"){renderSemana();renderTurnos();}
+  if(name==="clientas"){renderClientas();}
+}
+
+// ─── INIT ────────────────────────────────────────────────
+window.addEventListener("load",function(){
+  // Datos guardados en localStorage - sin SW necesario para archivo standalone
+
+  // Siempre cerrar splash, aunque algo falle
+  function hideSplash(){
+    var s=gs("splash");
+    if(s){s.classList.add("hide");setTimeout(function(){s.style.display="none";},700);}
+  }
+
+  try{
+    applyDark();
+  syncNegocioHeader();
+    mostrar();renderHistorial();renderStats();renderSemana();renderTurnos();renderClientas();
+    gs("precioServicio").value=preciosSvc[gs("tipoServicio").value]||0;
+    calcTotal();
+  }catch(e){console.error("Init error:",e);}
+
+  setTimeout(hideSplash, 1800);
+});
+// ─── CLIENTAS ────────────────────────────────────────────
+
+var _editIdxClienta=-1;
+
+function getIniciales(nombre){
+  if(!nombre)return"?";
+  var partes=nombre.trim().split(" ");
+  if(partes.length>=2)return(partes[0][0]+partes[1][0]).toUpperCase();
+  return partes[0].slice(0,2).toUpperCase();
+}
+
+function getHistorialClienta(nombre){
+  if(!nombre)return[];
+  var n=nombre.trim().toLowerCase();
+  return historial.filter(function(h){return h.nombre&&h.nombre.trim().toLowerCase()===n;});
+}
+
+function getTurnosClienta(nombre){
+  if(!nombre)return[];
+  var n=nombre.trim().toLowerCase();
+  return turnos.filter(function(t){return t.nombre&&t.nombre.trim().toLowerCase()===n;});
+}
+
+function getProxTurnoClienta(nombre){
+  var hoyStr=hoy();
+  var proximos=getTurnosClienta(nombre).filter(function(t){return t.fecha>=hoyStr&&!t.realizado;});
+  proximos.sort(function(a,b){return a.fecha>b.fecha?1:-1;});
+  return proximos[0]||null;
+}
+
+function diasHastaFecha(fechaStr){
+  var hoyD=new Date();hoyD.setHours(0,0,0,0);
+  var fp=fechaStr.split("-");
+  var tD=new Date(parseInt(fp[0]),parseInt(fp[1])-1,parseInt(fp[2]));
+  return Math.round((tD-hoyD)/(1000*60*60*24));
+}
+
+function fmtFechaLegible(fechaStr){
+  if(!fechaStr)return"";
+  var fp=fechaStr.split(" ")[0].split("-");
+  return fp[2]+"/"+fp[1]+"/"+fp[0];
+}
+
+// Sync: auto-crear ficha para clientas nuevas en historial y turnos
+function syncClientasDesdeHistorial(){
+  var nombres={};
+  historial.forEach(function(h){if(h.nombre)nombres[h.nombre.trim().toLowerCase()]=h.nombre.trim();});
+  turnos.forEach(function(t){if(t.nombre)nombres[t.nombre.trim().toLowerCase()]=t.nombre.trim();});
+  var huboNuevas=false;
+  Object.keys(nombres).forEach(function(k){
+    var existe=clientas.some(function(c){return c.nombre.trim().toLowerCase()===k;});
+    if(!existe){
+      clientas.push({nombre:nombres[k],telefono:"",notas:"",recordatorio:1,creada:hoy()});
+      huboNuevas=true;
+    }
+  });
+  if(huboNuevas) lsSave("clientas",clientas);
+}
+
+function renderClientas(){
+  // Asegurarse que el DOM está listo
+  var listaEl=gs("listaClientas");
+  var badgeEl=gs("badgeClientas");
+  if(!listaEl)return;
+
+  // Badge
+  if(badgeEl)badgeEl.textContent=clientas.length;
+
+  // Alertas recordatorio
+  var alertasEl=gs("alertasRecordatorio");
+  if(alertasEl){
+    alertasEl.innerHTML="";
+    clientas.forEach(function(c){
+      if(!c.recordatorio)return;
+      var prox=getProxTurnoClienta(c.nombre);
+      if(!prox)return;
+      var dias=diasHastaFecha(prox.fecha);
+      if(dias>=0&&dias<=c.recordatorio){
+        var txt=dias===0?"¡HOY es el turno!":dias===1?"Mañana tiene turno":"En "+dias+" días tiene turno";
+        alertasEl.innerHTML+='<div class="recordatorio-alert" onclick="abrirFichaClienta(\''+encodeURIComponent(c.nombre)+'\')">'
+          +'<div class="r-title">🔔 '+c.nombre+'</div>'
+          +'<div class="r-sub">'+txt+' · '+fmtFechaLegible(prox.fecha)+' '+fmtHora(prox.hora)+'</div>'
+          +'</div>';
+      }
+    });
+  }
+
+  // Dot notif
+  var notifEl=gs("notifClientas");
+  if(notifEl){
+    var tieneAlerta=clientas.some(function(c){
+      if(!c.recordatorio)return false;
+      var prox=getProxTurnoClienta(c.nombre);
+      if(!prox)return false;
+      return diasHastaFecha(prox.fecha)<=c.recordatorio&&diasHastaFecha(prox.fecha)>=0;
+    });
+    notifEl.style.display=tieneAlerta?"block":"none";
+  }
+
+  // Filtro buscador
+  var buscadorEl=gs("buscadorClientas");
+  var busq=buscadorEl?(buscadorEl.value||"").toLowerCase().trim():"";
+  var lista=clientas.filter(function(c){return!busq||c.nombre.toLowerCase().includes(busq);});
+  lista.sort(function(a,b){return a.nombre.localeCompare(b.nombre,"es");});
+
+  if(!lista.length){
+    listaEl.innerHTML='<div class="empty-state"><span class="empty-icon">👩</span>'+(busq?"Sin resultados":"Todavía no hay clientas registradas")+'</div>';
+    return;
+  }
+
+  var html="";
+  lista.forEach(function(c){
+    var hist=getHistorialClienta(c.nombre);
+    var totalGanado=hist.reduce(function(s,h){return s+(h.ganancia||0);},0);
+    var prox=getProxTurnoClienta(c.nombre);
+    var proxTxt=prox?"Próx: "+fmtFechaLegible(prox.fecha):"Sin turno próximo";
+    var ultFecha=hist.length?(hist.slice().sort(function(a,b){return b.fecha>a.fecha?1:-1;})[0].fecha):"";
+    var ultTxt=ultFecha?"Último: "+fmtFechaLegible(ultFecha):"Sin historial";
+    var idxC=clientas.indexOf(c);
+    html+='<div class="clienta-card" style="position:relative" onclick="abrirFichaClienta(\''+encodeURIComponent(c.nombre)+'\')">'
+      +'<div class="clienta-avatar">'+getIniciales(c.nombre)+'</div>'
+      +'<div class="clienta-info">'
+        +'<div class="clienta-nombre">'+c.nombre+'</div>'
+        +'<div class="clienta-meta">'+proxTxt+' · '+ultTxt+'</div>'
+        +'<div class="clienta-stats">'
+          +'<span class="clienta-stat">'+hist.length+' servicios</span>'
+          +(totalGanado>0?'<span class="clienta-stat">'+fmt(totalGanado)+'</span>':"")
+        +'</div>'
+      +'</div>'
+      +'<button class="btn-delete" onclick="event.stopPropagation();borrarClienta('+idxC+')" style="background:#FDEAEA;color:var(--danger);border:none;border-radius:8px;width:32px;height:32px;font-size:15px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">🗑</button>'
+      +'</div>';
+  });
+  listaEl.innerHTML=html;
+}
+
+
+function abrirFichaClienta(nombreEnc){
+  var nombre=decodeURIComponent(nombreEnc);
+  var c=clientas.find(function(x){return x.nombre.trim().toLowerCase()===nombre.trim().toLowerCase();});
+  if(!c)return;
+  var hist=getHistorialClienta(c.nombre).slice().sort(function(a,b){return b.fecha>a.fecha?1:-1;});
+  var totalGanado=hist.reduce(function(s,h){return s+(h.ganancia||0);},0);
+  var prox=getProxTurnoClienta(c.nombre);
+  var dias=prox?diasHastaFecha(prox.fecha):-1;
+
+  // Próximo servicio sugerido (21 días desde el último servicio realizado O turno agendado, lo que sea más reciente)
+  var proxSugeridoHtml="";
+  // Fecha base: el más reciente entre historial realizado y turnos agendados
+  var fechasBase=[];
+  if(hist.length) fechasBase.push(hist[0].fecha.split(" ")[0]);
+  var todosLosTurnos=getTurnosClienta(c.nombre);
+  todosLosTurnos.forEach(function(t){ if(t.fecha) fechasBase.push(t.fecha); });
+  fechasBase.sort(function(a,b){return b>a?1:-1;}); // descendente
+  if(fechasBase.length){
+    var ultFechaStr=fechasBase[0];
+    var fp=ultFechaStr.split("-");
+    var ultD=new Date(parseInt(fp[0]),parseInt(fp[1])-1,parseInt(fp[2]));
+    ultD.setDate(ultD.getDate()+21);
+    var sugerida=ultD.getFullYear()+"-"+pad(ultD.getMonth()+1)+"-"+pad(ultD.getDate());
+    var diasHastaSug=diasHastaFecha(sugerida);
+    var sugeridaLbl=fmtFechaStr(sugerida);
+    var urgColor=diasHastaSug<=0?"#D95555":diasHastaSug<=5?"#D98A3A":"#5BAD7F";
+    var urgTxt=diasHastaSug<0?"Venció hace "+Math.abs(diasHastaSug)+" días":diasHastaSug===0?"¡Hoy!":diasHastaSug===1?"Mañana":"En "+diasHastaSug+" días";
+    proxSugeridoHtml='<div style="background:linear-gradient(135deg,#FFF0F5,#F8E8F0);border:1.5px solid '+urgColor+';border-radius:14px;padding:13px 15px;margin-top:8px;display:flex;align-items:center;gap:12px;">'+
+      '<div style="font-size:26px">🔁</div>'+
+      '<div style="flex:1">'+
+        '<div style="font-size:11px;font-weight:700;color:'+urgColor+';text-transform:uppercase;letter-spacing:0.5px">Próximo servicio sugerido</div>'+
+        '<div style="font-size:15px;font-weight:800;color:#2A1F24;margin-top:2px">'+sugeridaLbl+'</div>'+
+        '<div style="font-size:12px;color:'+urgColor+';font-weight:700;margin-top:1px">'+urgTxt+' · cada 21 días</div>'+
+      '</div>'+
+      '<button onclick="agendarDesdeClienta(\''+encodeURIComponent(c.nombre)+'\',\''+sugerida+'\')" style="background:var(--rose);color:white;border:none;border-radius:10px;padding:8px 12px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;">+ Turno</button>'+
+    '</div>';
+  }
+
+  var proxHtml="";
+  if(prox){
+    var diasTxt=dias===0?"¡Hoy!":dias===1?"Mañana":"En "+dias+" días";
+    proxHtml='<div class="prox-turno-badge">📅 '+diasTxt+' — '+fmtFechaLegible(prox.fecha)+' '+fmtHora(prox.hora)+' · '+prox.servicio+'</div>';
+  }
+
+  var histHtml="";
+  if(hist.length){
+    hist.slice(0,20).forEach(function(h){
+      var extrasHtml="";
+      if(h.extras&&h.extras.length){
+        extrasHtml='<div class="ficha-turno-extras">';
+        h.extras.forEach(function(e){
+          // e puede ser objeto {nombre,precio,cant} o string
+          var label=typeof e==='object'?(e.nombre+(e.cant>1?' x'+e.cant:'')):(e||'');
+          var precio=typeof e==='object'&&e.precio?(e.precio*e.cant):0;
+          if(label) extrasHtml+='<span class="ficha-extra-chip">'+label+(precio?' · +'+fmt(precio):'')+'</span>';
+        });
+        extrasHtml+='</div>';
+      }
+      // Mostrar servicio base + extras separados
+      var precioBase=(h.precio||h.ganancia||0);
+      histHtml+='<div class="ficha-turno-item">'+
+        '<div style="flex:1;min-width:0;">'+
+          '<div class="ficha-turno-fecha">'+fmtFechaLegible(h.fecha)+'</div>'+
+          '<div class="ficha-turno-svc">'+h.servicio+'</div>'+
+          extrasHtml+
+        '</div>'+
+        '<div class="ficha-turno-precio" style="flex-shrink:0;margin-left:10px;">+'+fmt(h.ganancia||h.precio||0)+'</div>'+
+      '</div>';
+    });
+  } else {
+    histHtml='<div class="empty-state" style="padding:16px">Sin historial todavía</div>';
+  }
+
+  var idxReal=clientas.indexOf(c);
+
+  // Notas editable inline
+  var notasHtml='<div class="ficha-section">📝 Notas personales</div>'+
+    '<textarea id="fichaNotasEdit" onchange="guardarNotasInline('+idxReal+',this.value)" style="width:100%;padding:13px 14px;border:1.5px solid #EDE0E5;border-radius:12px;font-size:13px;outline:none;background:white;resize:none;min-height:72px;font-family:inherit;color:var(--text);line-height:1.5;" placeholder="Ej: Le gusta el francés, prefiere gel, alérgica a...">'+
+    (c.notas||'')+
+    '</textarea>';
+
+  gs("fichaContent").innerHTML=
+    '<div class="ficha-hero">'+
+      '<div class="ficha-avatar">'+getIniciales(c.nombre)+'</div>'+
+      '<div class="ficha-nombre">'+c.nombre+'</div>'+
+      (c.telefono?'<div class="ficha-tel">📞 '+c.telefono+'</div>':'')+
+      '<div class="ficha-stats-row">'+
+        '<div class="ficha-stat"><div class="ficha-stat-val">'+hist.length+'</div><div class="ficha-stat-lbl">Servicios</div></div>'+
+        '<div class="ficha-stat"><div class="ficha-stat-val">'+fmt(totalGanado).replace('$','')+'</div><div class="ficha-stat-lbl">Total</div></div>'+
+        '<div class="ficha-stat"><div class="ficha-stat-val">'+(hist.length?fmt(Math.round(totalGanado/hist.length)).replace('$',''):'-')+'</div><div class="ficha-stat-lbl">Promedio</div></div>'+
+      '</div>'+
+    '</div>'+
+    proxSugeridoHtml+
+    (proxHtml?'<div class="ficha-section">Próximo turno agendado</div>'+proxHtml:'')+
+    notasHtml+
+    '<div class="ficha-section">📸 Galería de trabajos</div>'+
+    renderGaleriaEnFicha(c.nombre)+
+    '<div class="ficha-section">Historial de servicios</div>'+
+    '<div style="background:white;border-radius:14px;padding:4px 14px;box-shadow:var(--shadow)">'+histHtml+'</div>'+
+    '<div style="display:flex;gap:10px;margin-top:16px">'+
+      '<button onclick="abrirModalClientas('+idxReal+');cerrarModalFicha();" style="flex:1;padding:13px;background:var(--blush);color:var(--rose-d);border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;">✏️ Editar</button>'+
+      (c.telefono?'<button class="ficha-wsp" style="flex:2" onclick="wsppClienta(\''+encodeURIComponent(c.nombre)+'\')">💬 WhatsApp</button>':'')+
+    '</div>'+
+    '<button onclick="confirmarEliminarClienta('+idxReal+')" style="width:100%;margin-top:10px;padding:13px;background:#FDEAEA;color:var(--danger);border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;">🗑 Eliminar clienta</button>';
+
+  gs("modalFichaClienta").classList.add("show");
+}
+
+function fmtFechaStr(fechaStr){
+  var NML2=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  var fp=fechaStr.split("-");
+  return fp[2]+" de "+NML2[parseInt(fp[1])-1]+" "+fp[0];
+}
+
+function guardarNotasInline(idx,val){
+  if(clientas[idx])clientas[idx].notas=val;
+  guardar();
+  showToast("📝 Nota guardada");
+}
+
+function agendarDesdeClienta(nombreEnc,fecha){
+  cerrarModalFicha();
+  // Navegar a agenda y abrir modal con fecha y nombre pre-completados
+  showTab("agenda");
+  diaSelected=fecha;
+  var fp=fecha.split("-");
+  var kDate=new Date(parseInt(fp[0]),parseInt(fp[1])-1,parseInt(fp[2]));kDate.setHours(0,0,0,0);
+  var dow=kDate.getDay();var diff=dow===0?-6:1-dow;
+  semanaBase=new Date(kDate);semanaBase.setDate(semanaBase.getDate()+diff);
+  renderSemana();renderTurnos();
+  setTimeout(function(){
+    abrirModal(-1);
+    gs("tNombre").value=decodeURIComponent(nombreEnc);
+    gs("tFecha").value=fecha;
+  },100);
+}
+
+function wsppClienta(nombreEnc){
+  var nombre=decodeURIComponent(nombreEnc);
+  var c=clientas.find(function(x){return x.nombre.trim().toLowerCase()===nombre.trim().toLowerCase();});
+  if(!c||!c.telefono)return;
+  var prox=getProxTurnoClienta(c.nombre);
+  var msg="Hola "+c.nombre.split(" ")[0]+" 💅\n";
+  if(prox){
+    msg+="Te recuerdo que tenés turno el "+fmtFechaLegible(prox.fecha)+" a las "+fmtHora(prox.hora)+".\n¡Te espero! 🌸";
+  } else {
+    msg+="¿Cómo estás? ¡Cuando quieras podés agendar tu próximo turno! 💕";
+  }
+  var tel=c.telefono.replace(/\D/g,"");
+  window.open("https://wa.me/54"+tel+"?text="+encodeURIComponent(msg),"_blank");
+}
+
+function cerrarModalFicha(){gs("modalFichaClienta").classList.remove("show");}
+
+var _idxEliminarClienta=-1;
+function confirmarEliminarClienta(idx){
+  _idxEliminarClienta=idx;
+  var c=clientas[idx];
+  if(!c)return;
+  gs("eliminarClientaNombre").textContent=c.nombre;
+  gs("modalEliminarClienta").classList.add("show");
+}
+function ejecutarEliminarClienta(){
+  var idx=_idxEliminarClienta;
+  if(idx<0||!clientas[idx])return;
+  var nombre=clientas[idx].nombre;
+  clientas.splice(idx,1);
+  lsSave("clientas",clientas);
+  guardar();
+  gs("modalEliminarClienta").classList.remove("show");
+  cerrarModalFicha();
+  renderClientas();
+  showToast("🗑 "+nombre+" eliminada");
+  _idxEliminarClienta=-1;
+}
+
+function abrirModalClientas(idx){
+  _editIdxClienta=idx;
+  if(idx===-1){
+    gs("modalClientaTitulo").textContent="👩 Nueva Clienta";
+    gs("btnGuardarClienta").textContent="Guardar clienta 👩";
+    gs("cNombre").value="";gs("cTelefono").value="";gs("cNotas").value="";gs("cRecordatorio").value="1";
+  } else {
+    var c=clientas[idx];
+    gs("modalClientaTitulo").textContent="✏️ Editar Clienta";
+    gs("btnGuardarClienta").textContent="Guardar cambios ✓";
+    gs("cNombre").value=c.nombre||"";gs("cTelefono").value=c.telefono||"";gs("cNotas").value=c.notas||"";
+    gs("cRecordatorio").value=c.recordatorio!=null?c.recordatorio:1;
+  }
+  gs("modalClientaForm").classList.add("show");
+}
+
+function cerrarModalClientaForm(){gs("modalClientaForm").classList.remove("show");}
+
+function guardarClienta(){
+  try{
+    var n=gs("cNombre").value.trim();
+    if(!n){showToast("⚠️ Ingresá un nombre");return;}
+    var obj={nombre:n,telefono:gs("cTelefono").value.trim(),notas:gs("cNotas").value.trim(),recordatorio:parseInt(gs("cRecordatorio").value)||0,creada:hoy()};
+    if(_editIdxClienta>=0){clientas[_editIdxClienta]=obj;}
+    else{
+      if(!Array.isArray(clientas)) clientas=[];
+    var existe=clientas.some(function(c){return c.nombre&&c.nombre.trim().toLowerCase()===n.toLowerCase();});
+      if(existe){showToast("⚠️ Ya existe una clienta con ese nombre");return;}
+      clientas.push(obj);
+    }
+    lsSave("clientas",clientas);
+    guardar();
+    cerrarModalClientaForm();
+    renderClientas();
+    showToast(_editIdxClienta>=0?"✅ Clienta actualizada":"✅ "+n+" agregada!");
+  }catch(e){
+    var p=document.getElementById("debugPanel");
+    if(p){p.style.display="block";p.innerHTML+="<b>guardarClienta ERROR:</b> "+e.message+"<br>";}
+    showToast("❌ Error: "+e.message);
+  }
+}
+function borrarClienta(idx){
+  if(!confirm("¿Borrar a "+clientas[idx].nombre+"? Esto no elimina sus turnos ni historial."))return;
+  clientas.splice(idx,1);
+  guardar();
+  renderClientas();
+  showToast("🗑 Clienta eliminada");
+}
+
+// ─── MODO OSCURO ─────────────────────────────────────────
+var darkMode=lsParse("darkMode")||false;
+function applyDark(){
+  document.body.classList.toggle("dark",darkMode);
+  var btn=gs("darkToggleBtn");
+  if(btn)btn.textContent=darkMode?"☀️":"🌙";
+}
+function toggleDark(){
+  darkMode=!darkMode;
+  lsSave("darkMode",darkMode);
+  applyDark();
+  showToast(darkMode?"🌙 Modo oscuro activado":"☀️ Modo claro activado");
+}
+
+// ─── GALERÍA ─────────────────────────────────────────────
+// fotos guardadas como: galeriaFotos[nombreKey] = [{data:base64, fecha:str, nota:str}, ...]
+var galeriaFotos = lsParse("galeriaFotos") || {};
+
+function nombreKey(nombre){return nombre.trim().toLowerCase();}
+
+function guardarGaleria(){lsSave("galeriaFotos",galeriaFotos);}
+
+function getFotosClienta(nombre){
+  return galeriaFotos[nombreKey(nombre)] || [];
+}
+
+function subirFotoClienta(nombre){
+  var input=document.createElement("input");
+  input.type="file";input.accept="image/*";input.multiple=true;
+  input.onchange=function(){
+    var files=Array.from(input.files);
+    if(!files.length)return;
+    var k=nombreKey(nombre);
+    if(!galeriaFotos[k])galeriaFotos[k]=[];
+    var pending=files.length;
+    files.forEach(function(file){
+      // Comprimir antes de guardar
+      var reader=new FileReader();
+      reader.onload=function(e){
+        comprimirImagen(e.target.result,function(compressed){
+          galeriaFotos[k].unshift({data:compressed,fecha:hoy(),nombre:file.name});
+          pending--;
+          if(pending===0){
+            guardarGaleria();
+            // Re-abrir ficha actualizada
+            abrirFichaClienta(encodeURIComponent(nombre));
+            showToast("📸 "+files.length+" foto"+(files.length>1?"s":"")+" agregada"+(files.length>1?"s":"")+"!");
+          }
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+  input.click();
+}
+
+function comprimirImagen(dataUrl,cb){
+  var img=new Image();
+  img.onload=function(){
+    var maxW=800,maxH=800;
+    var w=img.width,h=img.height;
+    if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+    if(h>maxH){w=Math.round(w*maxH/h);h=maxH;}
+    var canvas=document.createElement("canvas");
+    canvas.width=w;canvas.height=h;
+    canvas.getContext("2d").drawImage(img,0,0,w,h);
+    cb(canvas.toDataURL("image/jpeg",0.75));
+  };
+  img.src=dataUrl;
+}
+
+var _lightboxNombre="";
+var _lightboxIdx=-1;
+
+function abrirLightbox(nombre,idx){
+  _lightboxNombre=nombre;_lightboxIdx=idx;
+  var fotos=getFotosClienta(nombre);
+  var foto=fotos[idx];
+  if(!foto)return;
+  gs("lightboxImg").src=foto.data;
+  gs("lightboxDate").textContent=foto.fecha?fmtFechaLegible(foto.fecha+" "):"";
+  gs("lightbox").classList.add("show");
+}
+
+function cerrarLightbox(){
+  gs("lightbox").classList.remove("show");
+  gs("lightboxImg").src="";
+}
+
+function eliminarFotoActual(){
+  var k=nombreKey(_lightboxNombre);
+  if(!galeriaFotos[k])return;
+  galeriaFotos[k].splice(_lightboxIdx,1);
+  guardarGaleria();
+  cerrarLightbox();
+  abrirFichaClienta(encodeURIComponent(_lightboxNombre));
+  showToast("🗑 Foto eliminada");
+}
+
+function renderGaleriaEnFicha(nombre){
+  var fotos=getFotosClienta(nombre);
+  var html='<div class="galeria-grid">';
+  // Botón agregar siempre primero
+  html+='<div class="galeria-add" onclick="subirFotoClienta(\''+nombre.replace(/'/g,"\\'")+'\')">'
+      +'<span class="galeria-add-icon">📸</span>'
+      +'<span class="galeria-add-txt">Agregar</span>'
+      +'</div>';
+  fotos.forEach(function(f,i){
+    html+='<img class="galeria-thumb" src="'+f.data+'" loading="lazy" onclick="abrirLightbox(\''+nombre.replace(/'/g,"\\'")+'\','+i+')">';
+  });
+  html+='</div>';
+  if(!fotos.length){
+    html+='<p style="font-size:12px;color:var(--muted);text-align:center;padding:4px 0 12px;">Todavía no hay fotos · tocá 📸 para agregar</p>';
+  } else {
+    html+='<p style="font-size:11px;color:var(--muted);text-align:center;padding:0 0 10px;">'+fotos.length+' foto'+(fotos.length!==1?'s':'')+' · tocá para ampliar</p>';
+  }
+  return html;
+}
+
+// ─── PWA INSTALL ────────────────────────────────────────
+var _deferredPrompt = null;
+
+window.addEventListener("beforeinstallprompt", function(e){
+  e.preventDefault();
+  _deferredPrompt = e;
+  // Mostrar banner personalizado
+  var banner = document.getElementById("pwaInstallBanner");
+  if(banner) banner.style.display = "flex";
+});
+
+window.addEventListener("appinstalled", function(){
+  var banner = document.getElementById("pwaInstallBanner");
+  if(banner) banner.style.display = "none";
+  _deferredPrompt = null;
+  showToast("💅 ¡Nail Studio instalada con éxito!");
+});
+
+function pwaInstalarAhora(){
+  if(!_deferredPrompt) return;
+  _deferredPrompt.prompt();
+  _deferredPrompt.userChoice.then(function(result){
+    if(result.outcome === "accepted"){
+      showToast("💅 Instalando Nail Studio...");
+    }
+    var banner = document.getElementById("pwaInstallBanner");
+    if(banner) banner.style.display = "none";
+    _deferredPrompt = null;
+  });
+}
+
+function pwaCerrarBanner(){
+  var banner = document.getElementById("pwaInstallBanner");
+  if(banner) banner.style.display = "none";
+}
+
+// Fallback manual para iOS
+(function(){
+  var isStandalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;
+  if(!isStandalone){
+    var ua=navigator.userAgent;
+    var isIOS=/iPhone|iPad|iPod/.test(ua);
+    var hint=document.getElementById("installHint");
+    var msg=document.getElementById("installMsg");
+    if(hint&&msg&&isIOS){
+      msg.innerHTML='Tocá <strong>Compartir</strong> (⬆️) y luego<br><strong>"Agregar a pantalla de inicio"</strong>';
+      hint.style.display="block";
+    }
+  }
+})();
+
+</script>
+<!-- BANNER INSTALACIÓN PWA ANDROID -->
+<div id="pwaInstallBanner" style="display:none;position:fixed;bottom:80px;left:12px;right:12px;z-index:999;background:linear-gradient(135deg,#2A0A1E,#5C1A3A);border-radius:20px;padding:16px 18px;box-shadow:0 8px 32px rgba(42,10,30,0.6);align-items:center;gap:12px;">
+  <span style="font-size:32px;flex-shrink:0;">💅</span>
+  <div style="flex:1;min-width:0;">
+    <div style="font-size:14px;font-weight:800;color:#fff;">Instalar Nail Studio</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">Agregá la app a tu pantalla de inicio</div>
+  </div>
+  <button onclick="pwaInstalarAhora()" style="background:linear-gradient(135deg,#C9637A,#E8A0B0);color:white;border:none;border-radius:12px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer;flex-shrink:0;">Instalar</button>
+  <button onclick="pwaCerrarBanner()" style="background:rgba(255,255,255,0.15);color:white;border:none;border-radius:8px;width:30px;height:30px;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">✕</button>
+</div>
+
+<!-- MODAL RECARGAR STOCK -->
+<div class="modal-overlay" id="modalRestock">
+  <div class="modal-sheet">
+    <button class="modal-close" onclick="gs('modalRestock').classList.remove('show')">✕</button>
+    <div class="modal-title">📦 Agregar stock</div>
+    <div class="modal-subtitle" id="restockNombreLbl">—</div>
+    <div id="restockCajaInfo" style="background:var(--blush);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--mauve);font-weight:600;display:none;">
+      📦 Este insumo se carga por <strong id="restockCajaUnid">1</strong> unidades por caja/paquete
+    </div>
+    <div class="input-group">
+      <label id="restockCantLabel">¿Cuántas cajas/paquetes comprás?</label>
+      <div style="display:flex;align-items:center;gap:14px;background:var(--blush);border-radius:12px;padding:12px 18px;">
+        <button onclick="restockCambiarCant(-1)" style="background:var(--rose);color:white;border:none;border-radius:8px;width:36px;height:36px;font-size:20px;font-weight:900;cursor:pointer;flex-shrink:0;">−</button>
+        <div style="flex:1;text-align:center;">
+          <div id="restockCantDisp" style="font-size:28px;font-weight:900;line-height:1;">1</div>
+          <div id="restockUnidTotal" style="font-size:11px;color:var(--muted);margin-top:2px;"></div>
+        </div>
+        <button onclick="restockCambiarCant(1)" style="background:var(--rose);color:white;border:none;border-radius:8px;width:36px;height:36px;font-size:20px;font-weight:900;cursor:pointer;flex-shrink:0;">+</button>
+      </div>
+    </div>
+    <div class="input-group">
+      <label>Precio total de esta compra <span style="font-weight:400;color:var(--muted)">(lo que pagaste)</span></label>
+      <input type="number" id="restockPrecio" placeholder="0" oninput="actualizarRestockPreview()" style="font-size:18px;">
+    </div>
+    <div id="restockGastoPreview" style="background:var(--blush);border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:var(--muted);display:none;">
+      💸 Esta compra: <strong id="restockGastoAmt" style="color:var(--rose-d)">$0</strong>
+      &nbsp;·&nbsp; Precio por unidad: <strong id="restockPrecioUnid" style="color:var(--mauve)">$0</strong>
+      <br>Total gastado acum.: <strong id="restockGastoAcum" style="color:var(--mauve)">$0</strong>
+    </div>
+    <button class="btn btn-rose" onclick="confirmarRestock()">✅ Confirmar compra</button>
+  </div>
+</div>
+
+<!-- MODAL EDITAR INSUMO -->
+<div class="modal-overlay" id="modalEditStock">
+  <div class="modal-sheet">
+    <button class="modal-close" onclick="gs('modalEditStock').classList.remove('show')">✕</button>
+    <div class="modal-title">✏️ Editar insumo</div>
+    <input type="hidden" id="editStockIdx">
+    <div class="input-group"><label>Nombre</label><input type="text" id="editStockNombre" placeholder="Nombre del insumo"></div>
+    <div class="input-row">
+      <div class="input-group"><label>Precio actual (por envase/caja)</label><input type="number" id="editStockPrecio" placeholder="0"></div>
+      <div class="input-group"><label>Stock mínimo</label><input type="number" id="editStockMin" placeholder="1"></div>
+    </div>
+    <div class="input-row">
+      <div class="input-group"><label>Stock actual (unidades)</label><input type="number" id="editStockCant" placeholder="0"></div>
+      <div class="input-group">
+        <label>Unidades por caja/paquete</label>
+        <input type="number" id="editStockUnidadxCaja" placeholder="1" min="1">
+        <p style="font-size:10px;color:var(--muted);margin-top:4px;">Ej: guantes = 100 · lima = 1</p>
+      </div>
+    </div>
+    <button class="btn btn-rose" onclick="guardarEditStock()">Guardar cambios ✓</button>
+    <button onclick="eliminarMensualModal()" style="width:100%;padding:12px;border:none;border-radius:10px;background:#FDEAEA;color:var(--danger);font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;">🗑 Eliminar insumo</button>
+  </div>
+</div>
+
+<!-- MODAL EDITAR ITEM ÚNICO -->
+<div class="modal-overlay" id="modalEditUnica">
+  <div class="modal-sheet">
+    <button class="modal-close" onclick="gs('modalEditUnica').classList.remove('show')">✕</button>
+    <div class="modal-title">✏️ Editar item</div>
+    <input type="hidden" id="editUnicaIdx">
+    <div class="input-group"><label>Nombre</label><input type="text" id="editUnicaNombre" placeholder="Nombre"></div>
+    <div class="input-group"><label>Precio</label><input type="number" id="editUnicaPrecio" placeholder="0"></div>
+    <button class="btn btn-rose" onclick="guardarEditUnica()">Guardar ✓</button>
+    <button onclick="eliminarUnicaModal()" style="width:100%;padding:12px;border:none;border-radius:10px;background:#FDEAEA;color:var(--danger);font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;">🗑 Eliminar item</button>
+  </div>
+</div>
+<!-- MODAL ELIMINAR CLIENTA -->
+<div class="modal-overlay" id="modalEliminarClienta">
+  <div class="modal-sheet" style="text-align:center;padding-bottom:32px;">
+    <div style="font-size:48px;margin-bottom:10px;">🗑</div>
+    <div style="font-size:18px;font-weight:900;margin-bottom:8px;">¿Eliminar clienta?</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:6px;"><strong id="eliminarClientaNombre"></strong></div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:24px;">Esta acción no se puede deshacer.</div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="gs('modalEliminarClienta').classList.remove('show')" style="flex:1;padding:14px;background:var(--blush);color:var(--text);border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">Cancelar</button>
+      <button onclick="ejecutarEliminarClienta()" style="flex:1;padding:14px;background:var(--danger);color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">Sí, eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" onclick="cerrarLightbox()">✕</button>
+  <img id="lightboxImg" src="" alt="Trabajo">
+  <div class="lightbox-date" id="lightboxDate"></div>
+  <button class="lightbox-del" onclick="eliminarFotoActual()">🗑 Eliminar foto</button>
+</div>
+
+</body>
+</html>
