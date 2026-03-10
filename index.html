@@ -219,6 +219,22 @@ body.dark .btn-edit-stock{background:#2A1A44;color:#B794F4;}
 body.dark .gasto-acum-chip{background:#2A1422;color:var(--rose-l);}
 .stock-precio-actual{font-size:11px;color:var(--muted);margin-top:2px;}
 .modal-subtitle{font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:600;}
+/* SECCIONES COLAPSABLES */
+.section-title-btn{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:18px 16px 10px;margin:0;}
+.section-title-btn:active{opacity:0.7;}
+.collapse-icon{font-size:18px;transition:transform 0.3s;color:var(--muted);flex-shrink:0;}
+.collapse-icon.open{transform:rotate(180deg);}
+.collapsible-section{overflow:hidden;transition:max-height 0.4s cubic-bezier(.4,0,.2,1),opacity 0.3s;max-height:99999px;opacity:1;}
+.collapsible-section.closed{max-height:0 !important;opacity:0;pointer-events:none;}
+
+/* BUSCADOR STOCK */
+.stock-search-wrap{padding:0 16px 10px;position:relative;}
+.stock-search-input{width:100%;padding:13px 16px 13px 42px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;outline:none;background:var(--card);color:var(--text);transition:border 0.2s;}
+.stock-search-input:focus{border-color:var(--rose);}
+.stock-search-icon{position:absolute;left:28px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;}
+body.dark .stock-search-input{background:var(--input-bg);border-color:var(--border);color:var(--text);}
+.stock-no-results{text-align:center;padding:24px;color:var(--muted);font-size:14px;}
+
 /* CONSUMIBLES POR SERVICIO */
 .consumibles-card{background:var(--card);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);margin:0 16px 16px;}
 .consumible-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
@@ -491,6 +507,11 @@ body.dark .precio-row span { color: var(--text); }
   <p class="section-title">🧤 Consumibles por servicio</p>
   <p style="font-size:12px;color:var(--muted);margin:-6px 16px 10px;">Seleccioná qué insumos se descuentan automáticamente del stock cada vez que registrás un servicio.</p>
   <div id="consumiblesAvisoStockBajo" class="consumibles-aviso"></div>
+  <!-- Buscador consumibles -->
+  <div class="stock-search-wrap">
+    <span class="stock-search-icon">🔍</span>
+    <input type="text" class="stock-search-input" id="buscadorConsumibles" placeholder="Buscar consumible..." oninput="renderConsumibles()">
+  </div>
   <div class="consumibles-card" id="consumiblesCard"></div>
 </div>
 
@@ -585,38 +606,67 @@ body.dark .precio-row span { color: var(--text); }
 
 <!-- STOCK -->
 <div id="page-inversion" class="page">
-  <p class="section-title">🛠 Inversión única <span class="badge" id="badgeUnica">0</span></p>
-  <div id="listaUnica"></div>
-  <div class="total-row" id="totalUnicaRow" style="display:none"><span>Total</span><span id="totalUnica"></span></div>
-  <div class="form-card">
-    <div class="input-group"><label>Nombre</label><input type="text" id="nombreUnica" placeholder="Ej: Torno eléctrico"></div>
-    <div class="input-group"><label>Precio</label><input type="number" id="precioUnica" placeholder="0"></div>
-    <button class="btn btn-rose" onclick="agregarUnica()">+ Agregar item</button>
+
+  <!-- INVERSIÓN ÚNICA colapsable -->
+  <div class="section-title-btn" onclick="toggleSeccion('unica')">
+    <span class="section-title" style="margin:0;padding:0;">🛠 Inversión única <span class="badge" id="badgeUnica">0</span></span>
+    <span class="collapse-icon open" id="iconUnica">▼</span>
   </div>
-  <p class="section-title">🧴 Insumos mensuales <span class="badge" id="badgeMensual">0</span></p>
-  <div id="stockGastoTotal" class="stock-gasto-total" style="display:none">
-    <div><div class="stock-gasto-lbl">💸 Total gastado en recargas</div><div id="stockGastoVal" class="stock-gasto-val">$0</div></div>
-    <span style="font-size:32px">📦</span>
+  <div class="collapsible-section" id="secUnica">
+    <div id="listaUnica"></div>
+    <div class="total-row" id="totalUnicaRow" style="display:none"><span>Total</span><span id="totalUnica"></span></div>
+    <div class="form-card">
+      <div class="input-group"><label>Nombre</label><input type="text" id="nombreUnica" placeholder="Ej: Torno eléctrico"></div>
+      <div class="input-group"><label>Precio</label><input type="number" id="precioUnica" placeholder="0"></div>
+      <button class="btn btn-rose" onclick="agregarUnica()">+ Agregar item</button>
+    </div>
   </div>
-  <div id="alertasStock"></div>
-  <div id="listaMensual"></div>
-  <div class="total-row" id="totalMensualRow" style="display:none"><span>Precio actual (suma)</span><span id="totalMensual"></span></div>
-  <div class="form-card">
-    <div class="input-group"><label>Nombre</label><input type="text" id="nombreMensual" placeholder="Ej: Guantes T(M)"></div>
-    <div class="input-row">
-      <div class="input-group"><label>Precio (por caja/paquete)</label><input type="number" id="precioMensual" placeholder="0"></div>
-      <div class="input-group">
-        <label>Unidades por caja</label>
-        <input type="number" id="unidadxCajaMensual" placeholder="1" min="1">
-        <p style="font-size:10px;color:var(--muted);margin-top:3px;">Ej: guantes=100 · lima=1</p>
+
+  <!-- INSUMOS MENSUALES colapsable -->
+  <div class="section-title-btn" onclick="toggleSeccion('mensual')">
+    <span class="section-title" style="margin:0;padding:0;">🧴 Insumos mensuales <span class="badge" id="badgeMensual">0</span></span>
+    <span class="collapse-icon open" id="iconMensual">▼</span>
+  </div>
+  <div class="collapsible-section" id="secMensual">
+    <!-- Buscador -->
+    <div class="stock-search-wrap">
+      <span class="stock-search-icon">🔍</span>
+      <input type="text" class="stock-search-input" id="buscadorStock" placeholder="Buscar insumo..." oninput="renderInversion()">
+    </div>
+    <!-- Resultados de búsqueda: solo aparece cuando hay texto en el buscador -->
+    <div id="listaMensualBusqueda"></div>
+    <!-- Lista normal + alertas + gasto (se ocultan al buscar) -->
+    <div id="seccionNormalMensual">
+      <div id="stockGastoTotal" class="stock-gasto-total" style="display:none">
+        <div><div class="stock-gasto-lbl">💸 Total gastado en recargas</div><div id="stockGastoVal" class="stock-gasto-val">$0</div></div>
+        <span style="font-size:32px">📦</span>
       </div>
+      <div id="alertasStock"></div>
+      <div id="listaMensual"></div>
+      <div class="total-row" id="totalMensualRow" style="display:none"><span>💸 Total gastado en insumos</span><span id="totalMensual"></span></div>
     </div>
-    <div class="input-row">
-      <div class="input-group"><label>Cajas iniciales</label><input type="number" id="stockActual" placeholder="1"></div>
-      <div class="input-group"><label>Stock mínimo (unidades)</label><input type="number" id="stockMin" placeholder="10"></div>
+    <div class="form-card">
+      <div class="input-group"><label>Nombre</label><input type="text" id="nombreMensual" placeholder="Ej: Guantes T(M)"></div>
+      <div class="input-row">
+        <div class="input-group"><label>Precio (por caja/paquete)</label><input type="number" id="precioMensual" placeholder="0"></div>
+        <div class="input-group">
+          <label>Unidades por caja</label>
+          <input type="number" id="unidadxCajaMensual" placeholder="1" min="1">
+          <p style="font-size:10px;color:var(--muted);margin-top:3px;">Ej: guantes=100 · lima=1</p>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="input-group"><label>Cajas iniciales</label><input type="number" id="stockActual" placeholder="1"></div>
+        <div class="input-group"><label>Stock mínimo (unidades)</label><input type="number" id="stockMin" placeholder="10"></div>
+      </div>
+      <div class="input-group">
+        <label>📅 Fecha de compra</label>
+        <input type="date" id="fechaMensual">
+      </div>
+      <button class="btn btn-rose" onclick="agregarMensual()">+ Agregar insumo</button>
     </div>
-    <button class="btn btn-rose" onclick="agregarMensual()">+ Agregar insumo</button>
   </div>
+
 </div>
 
 <!-- CLIENTAS -->
@@ -645,10 +695,23 @@ body.dark .precio-row span { color: var(--text); }
   </div>
   <div id="statsContent"></div>
   <!-- Botón exportar -->
-  <div style="padding:8px 16px 24px;">
+  <div style="padding:8px 16px 4px;">
     <button onclick="exportarResumen()" style="width:100%;padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#2A0A1E,#5C1A3A);color:white;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
       📸 Exportar resumen del mes
     </button>
+  </div>
+  <!-- Backup completo -->
+  <div style="padding:4px 16px 24px;">
+    <p style="font-size:11px;color:var(--muted);text-align:center;margin:6px 0 8px;">💾 Pasá todos tus datos al celular</p>
+    <div style="display:flex;gap:8px;">
+      <button onclick="exportarDatos()" style="flex:1;padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,#1a3a5c,#1a6c5c);color:white;font-size:13px;font-weight:800;cursor:pointer;">
+        📤 Exportar datos
+      </button>
+      <button onclick="gs('importFileInput').click()" style="flex:1;padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,#3a1a5c,#6c1a3a);color:white;font-size:13px;font-weight:800;cursor:pointer;">
+        📥 Importar datos
+      </button>
+    </div>
+    <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importarDatos(this)">
   </div>
 </div>
 
@@ -863,33 +926,123 @@ function lsSave(k,v){try{_ls.setItem(k,JSON.stringify(v));}catch(e){_memStore[k]
 // ─── DATOS ───────────────────────────────────────────────
 var PRECIOS_SVC_DEF={"Capping gel":10000,"Capping poly gel":10000,"Esculpidas polygel":12000,"Semipermanente":8000};
 var PRECIOS_EXT_DEF={"Retirado":1000,"Retirado otro salon":2000,"Arreglo por una":300};
-var UNICOS_DEF=[{nombre:"Curso",precio:90000},{nombre:"Envío torno y cabina",precio:8000},{nombre:"Torno y cabina",precio:63000}];
+var UNICOS_DEF=[
+  {nombre:"Curso",precio:90000},
+  {nombre:"Envío torno y cabina",precio:8000},
+  {nombre:"Torno y cabina",precio:63000},
+  {nombre:"Apoya porta pinceles corona perlas",precio:1800},
+  {nombre:"Alicate corta uñas Charm Limit",precio:700},
+  {nombre:"Dispenser Toallitas Wipes Cherimoya",precio:18000},
+  {nombre:"Tijera para cutículas",precio:12880},
+  {nombre:"Vaso Dappen",precio:700}
+];
 var MENSUALES_DEF=[
-  {nombre:"Guantes T(M)",precio:8120,stock:2,stockMin:1},{nombre:"Adhere",precio:1610,stock:2,stockMin:1},
-  {nombre:"Ultra bond",precio:8400,stock:1,stockMin:1},{nombre:"Base Cheu",precio:8400,stock:1,stockMin:1},
-  {nombre:"Top Meliné",precio:7000,stock:1,stockMin:1},{nombre:"Lima 100/180",precio:600,stock:3,stockMin:2},
-  {nombre:"Lima 240/360",precio:600,stock:3,stockMin:2},{nombre:"Clarificador",precio:4340,stock:1,stockMin:1},
-  {nombre:"Cepillo x2",precio:560,stock:2,stockMin:1},{nombre:"Fresas x2",precio:3220,stock:1,stockMin:1},
-  {nombre:"Palitos de naranja",precio:2240,stock:2,stockMin:1},{nombre:"Wipers",precio:3150,stock:1,stockMin:1},
-  {nombre:"Tijera p/ cutícula",precio:12880,stock:1,stockMin:1},{nombre:"Aceite p/ cutícula",precio:2380,stock:2,stockMin:1},
-  {nombre:"Polygel",precio:8170,stock:1,stockMin:1},{nombre:"Moldes",precio:11340,stock:2,stockMin:1},
-  {nombre:"Pincel liner",precio:2380,stock:1,stockMin:1},{nombre:"Set pinceles 15U",precio:2450,stock:1,stockMin:1},
-  {nombre:"Pincel p/ polygel",precio:2100,stock:1,stockMin:1},{nombre:"Buffer block",precio:700,stock:3,stockMin:2},
-  {nombre:"Dapper",precio:700,stock:2,stockMin:1},{nombre:"Colores x6",precio:10080,stock:1,stockMin:1},
-  {nombre:"Polvos x6",precio:5400,stock:1,stockMin:1}
+  {nombre:"Guantes T(M)",precio:8120,stock:2,stockMin:1},
+  {nombre:"Adhere",precio:1610,stock:2,stockMin:1},
+  {nombre:"Ultra bond",precio:8400,stock:1,stockMin:1},
+  {nombre:"Base Cheu",precio:8400,stock:1,stockMin:1},
+  {nombre:"Top Meliné",precio:7000,stock:1,stockMin:1},
+  {nombre:"Lima 100/180",precio:600,stock:3,stockMin:2},
+  {nombre:"Lima 240/360",precio:600,stock:3,stockMin:2},
+  {nombre:"Clarificador",precio:4340,stock:1,stockMin:1},
+  {nombre:"Cepillo x2",precio:560,stock:2,stockMin:1},
+  {nombre:"Fresas x2",precio:3220,stock:1,stockMin:1},
+  {nombre:"Wipers",precio:3150,stock:1,stockMin:1},
+  {nombre:"Aceite p/ cutícula",precio:2380,stock:2,stockMin:1},
+  {nombre:"Polygel",precio:8170,stock:1,stockMin:1},
+  {nombre:"Moldes",precio:11340,stock:2,stockMin:1},
+  {nombre:"Pincel liner",precio:2380,stock:1,stockMin:1},
+  {nombre:"Set pinceles 15U",precio:2450,stock:1,stockMin:1},
+  {nombre:"Pincel p/ polygel",precio:2100,stock:1,stockMin:1},
+  {nombre:"Buffer block",precio:700,stock:3,stockMin:2},
+  {nombre:"Colores x6",precio:10080,stock:1,stockMin:1},
+  {nombre:"Polvos x6",precio:5400,stock:1,stockMin:1},
+  // ── Nuevos insumos agregados ──
+  {nombre:"Bloques pack x10",precio:4300,stock:10,stockMin:2,unidadxCaja:10},
+  {nombre:"Top Coat Matte Cherimoya",precio:6000,stock:1,stockMin:1},
+  {nombre:"Top Coat Meline",precio:5000,stock:1,stockMin:1},
+  {nombre:"Sello para stamping Charm Limit",precio:2400,stock:1,stockMin:1},
+  {nombre:"Quita esmalte bebé 60ml",precio:850,stock:1,stockMin:1},
+  {nombre:"Polvo metalizado colores Eloise 6u",precio:1800,stock:1,stockMin:1},
+  {nombre:"Polvo holográfico Eloise #1010",precio:1150,stock:1,stockMin:1},
+  {nombre:"Polvo Glitter Eloise #1021",precio:950,stock:1,stockMin:1},
+  {nombre:"Polvo espejo Eloise #1005",precio:1150,stock:1,stockMin:1},
+  {nombre:"Pincel degradé glitter Charm Limit",precio:1700,stock:1,stockMin:1},
+  {nombre:"Papel oro y plata Eloise",precio:1700,stock:1,stockMin:1},
+  {nombre:"Palito de naranjo x50",precio:800,stock:50,stockMin:10,unidadxCaja:50},
+  {nombre:"Paleta exhibidora uñas",precio:800,stock:1,stockMin:1},
+  {nombre:"Limas PINKY medialuna 240/320 x25",precio:6900,stock:25,stockMin:5,unidadxCaja:25},
+  {nombre:"Muestrarios uñas almendra Eloise",precio:1400,stock:1,stockMin:1},
+  {nombre:"Micro hisopos madera 50u Charm Limit",precio:500,stock:50,stockMin:10,unidadxCaja:50},
+  {nombre:"Lima 100/180 medialuna Charm Limit x25",precio:7300,stock:25,stockMin:5,unidadxCaja:25},
+  {nombre:"Fresa diamantada Flama roja",precio:800,stock:1,stockMin:1},
+  {nombre:"Fresa cerámica M 3/32 Flame S",precio:1500,stock:1,stockMin:1},
+  {nombre:"Esmalte UV/led Charm Limit (46)",precio:1500,stock:1,stockMin:1},
+  {nombre:"Esmalte UV/led Charm Limit (45)",precio:1500,stock:1,stockMin:1},
+  {nombre:"Esmalte UV/led Charm Limit (44)",precio:1500,stock:1,stockMin:1},
+  {nombre:"Esmalte UV/led Charm Limit (41)",precio:1500,stock:1,stockMin:1},
+  {nombre:"Esmalte UV/led Charm Limit (37)",precio:1500,stock:1,stockMin:1},
+  {nombre:"Esmalte UV/led Charm Limit (32)",precio:1500,stock:1,stockMin:1},
+  {nombre:"Esmalte UV/led Charm Limit (29)",precio:1500,stock:1,stockMin:1},
+  {nombre:"Esmalte UV/led Charm Limit (14)",precio:1500,stock:1,stockMin:1},
+  {nombre:"Esmalte UV/led Charm Limit (13)",precio:1500,stock:1,stockMin:1},
+  {nombre:"Esmalte UV/led Charm Limit (03)",precio:1500,stock:1,stockMin:1},
+  {nombre:"Esmalte Eloise ANMAT (40)",precio:1500,stock:1,stockMin:1},
+  {nombre:"Esmalte Diamonds Gel Charm Limit",precio:2400,stock:3,stockMin:1},
+  {nombre:"Esmalte blanco Charm Limit UV/led",precio:1500,stock:1,stockMin:1},
+  {nombre:"Compresas campo trabajo Ktex x50",precio:2700,stock:50,stockMin:10,unidadxCaja:50},
+  {nombre:"Clarificador 250ml Las Varano",precio:4500,stock:1,stockMin:1},
+  {nombre:"Brocha para polvillo Charm Limit",precio:1900,stock:1,stockMin:1},
+  {nombre:"Base Coat Cherimoya 15ml",precio:6000,stock:1,stockMin:1},
+  {nombre:"Base Blooming Charm Limit",precio:2300,stock:1,stockMin:1},
+  {nombre:"Baldecito cuadrado BT055",precio:800,stock:2,stockMin:1},
+  {nombre:"Aceite cutícula Cherimoya",precio:1800,stock:1,stockMin:1},
+  {nombre:"Ablandador de cutículas PINKY",precio:1100,stock:1,stockMin:1}
 ];
 
-var preciosSvc = lsParse("preciosSvc") || JSON.parse(JSON.stringify(PRECIOS_SVC_DEF));
-var preciosExt = lsParse("preciosExt") || JSON.parse(JSON.stringify(PRECIOS_EXT_DEF));
-var invUnica   = lsParse("unica")      || UNICOS_DEF;
-var insMensual = lsParse("mensual")    || MENSUALES_DEF;
-var historial  = lsParse("historial")  || [];
-var turnos     = lsParse("turnos")     || [];
-var clientas = (function(){ var v=lsParse("clientas"); return Array.isArray(v)?v:[]; })();
+var preciosSvc = lsParse("preciosSvc") || {"Capping gel": 10000, "Capping poly gel": 10000, "Esculpidas polygel": 12000, "Semipermanente": 8000};
+var preciosExt = lsParse("preciosExt") || {"Retirado": 1000, "Retirado otro salon": 2000, "Arreglo por una": 300};
+var invUnica, insMensual;
+
+// ── Datos base fijos (viajan con el archivo) ──
+var _UNICA_BASE = [{"nombre": "Curso", "precio": 90000}, {"nombre": "Envío PRIMER PEDIDO", "precio": 8000}, {"nombre": "Torno y cabina", "precio": 63000}, {"nombre": "Apoya porta pinceles corona perlas", "precio": 1800}, {"nombre": "Alicate corta uñas Charm Limit", "precio": 700}, {"nombre": "Dispenser Toallitas Wipes Cherimoya", "precio": 18000}, {"nombre": "Vaso Dappen", "precio": 700}, {"nombre": "ENVIO 2 SEGUNDO PEDIDO", "precio": 14000}];
+var _MENSUAL_BASE = [{"nombre": "Bloques pack x10", "precio": 4300, "stock": 10, "stockMin": 2, "unidadxCaja": 10, "gastoAcum": 4300, "recargas": [{"fecha": "09/03/2025", "cant": 10, "cajas": 1, "precio": 4300, "precioUnidad": 430, "total": 4300}]}, {"nombre": "Top Coat Matte Cherimoya", "precio": 6000, "stock": 1, "stockMin": 1, "gastoAcum": 6000, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 6000, "precioUnidad": 6000, "total": 6000}]}, {"nombre": "Top Coat Meline", "precio": 7000, "stock": 2, "stockMin": 1, "gastoAcum": 12000, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 5000, "precioUnidad": 5000, "total": 5000}, {"fecha": "09/03/2026", "cant": 1, "cajas": 1, "precio": 7000, "precioUnidad": 7000, "total": 7000}], "unidadxCaja": 1}, {"nombre": "Sello para stamping Charm Limit", "precio": 2400, "stock": 1, "stockMin": 1, "gastoAcum": 2400, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 2400, "precioUnidad": 2400, "total": 2400}]}, {"nombre": "Quita esmalte bebé 60ml", "precio": 850, "stock": 1, "stockMin": 1, "gastoAcum": 850, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 850, "precioUnidad": 850, "total": 850}]}, {"nombre": "Polvo metalizado colores Eloise 6u", "precio": 1800, "stock": 1, "stockMin": 1, "gastoAcum": 1800, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1800, "precioUnidad": 1800, "total": 1800}]}, {"nombre": "Polvo holográfico Eloise #1010", "precio": 1150, "stock": 1, "stockMin": 1, "gastoAcum": 1150, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1150, "precioUnidad": 1150, "total": 1150}]}, {"nombre": "Polvo Glitter Eloise #1021", "precio": 950, "stock": 1, "stockMin": 1, "gastoAcum": 950, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 950, "precioUnidad": 950, "total": 950}]}, {"nombre": "Polvo espejo Eloise #1005", "precio": 1150, "stock": 1, "stockMin": 1, "gastoAcum": 1150, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1150, "precioUnidad": 1150, "total": 1150}]}, {"nombre": "Pincel degradé glitter Charm Limit", "precio": 1700, "stock": 1, "stockMin": 1, "gastoAcum": 1700, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1700, "precioUnidad": 1700, "total": 1700}]}, {"nombre": "Papel oro y plata Eloise", "precio": 1700, "stock": 1, "stockMin": 1, "gastoAcum": 1700, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1700, "precioUnidad": 1700, "total": 1700}]}, {"nombre": "Palito de naranjo", "precio": 1120, "stock": 150, "stockMin": 10, "unidadxCaja": 50, "gastoAcum": 3040, "recargas": [{"fecha": "09/03/2025", "cant": 50, "cajas": 1, "precio": 800, "precioUnidad": 16, "total": 800}, {"fecha": "09/03/2026", "cant": 100, "cajas": 2, "precio": 1120, "precioUnidad": 22.4, "total": 2240}]}, {"nombre": "Paleta exhibidora uñas", "precio": 800, "stock": 1, "stockMin": 1, "gastoAcum": 800, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 800, "precioUnidad": 800, "total": 800}]}, {"nombre": "Limas PINKY medialuna 240/320 x25", "precio": 6900, "stock": 25, "stockMin": 5, "unidadxCaja": 25, "gastoAcum": 6900, "recargas": [{"fecha": "09/03/2025", "cant": 25, "cajas": 1, "precio": 6900, "precioUnidad": 276, "total": 6900}]}, {"nombre": "Muestrarios uñas almendra Eloise", "precio": 1400, "stock": 1, "stockMin": 1, "gastoAcum": 1400, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1400, "precioUnidad": 1400, "total": 1400}]}, {"nombre": "Micro hisopos madera 50u Charm Limit", "precio": 500, "stock": 50, "stockMin": 10, "unidadxCaja": 50, "gastoAcum": 500, "recargas": [{"fecha": "09/03/2025", "cant": 50, "cajas": 1, "precio": 500, "precioUnidad": 10, "total": 500}]}, {"nombre": "Lima 100/180 medialuna Charm Limit x25", "precio": 7300, "stock": 26, "stockMin": 5, "unidadxCaja": 25, "gastoAcum": 7900, "recargas": [{"fecha": "09/03/2025", "cant": 25, "cajas": 1, "precio": 7300, "precioUnidad": 292, "total": 7300}, {"fecha": "09/03/2026", "cant": 1, "cajas": 1, "precio": 600, "precioUnidad": 600, "total": 600}]}, {"nombre": "Fresa diamantada Flama roja", "precio": 1610, "stock": 2, "stockMin": 1, "gastoAcum": 2410, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 800, "precioUnidad": 800, "total": 800}, {"fecha": "09/03/2026", "cant": 1, "cajas": 1, "precio": 1610, "precioUnidad": 1610, "total": 1610}]}, {"nombre": "Fresa cerámica M 3/32 Flame S", "precio": 1610, "stock": 2, "stockMin": 1, "gastoAcum": 3110, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1500, "precioUnidad": 1500, "total": 1500}, {"fecha": "09/03/2026", "cant": 1, "cajas": 1, "precio": 1610, "precioUnidad": 1610, "total": 1610}]}, {"nombre": "Esmalte UV/led Charm Limit (46)", "precio": 1500, "stock": 1, "stockMin": 1, "gastoAcum": 1500, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1500, "precioUnidad": 1500, "total": 1500}]}, {"nombre": "Esmalte UV/led Charm Limit (45)", "precio": 1500, "stock": 1, "stockMin": 1, "gastoAcum": 1500, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1500, "precioUnidad": 1500, "total": 1500}]}, {"nombre": "Esmalte UV/led Charm Limit (44)", "precio": 1500, "stock": 1, "stockMin": 1, "gastoAcum": 1500, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1500, "precioUnidad": 1500, "total": 1500}]}, {"nombre": "Esmalte UV/led Charm Limit (41)", "precio": 1500, "stock": 1, "stockMin": 1, "gastoAcum": 1500, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1500, "precioUnidad": 1500, "total": 1500}]}, {"nombre": "Esmalte UV/led Charm Limit (37)", "precio": 1500, "stock": 1, "stockMin": 1, "gastoAcum": 1500, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1500, "precioUnidad": 1500, "total": 1500}]}, {"nombre": "Esmalte UV/led Charm Limit (32)", "precio": 1500, "stock": 1, "stockMin": 1, "gastoAcum": 1500, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1500, "precioUnidad": 1500, "total": 1500}]}, {"nombre": "Esmalte UV/led Charm Limit (29)", "precio": 1500, "stock": 1, "stockMin": 1, "gastoAcum": 1500, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1500, "precioUnidad": 1500, "total": 1500}]}, {"nombre": "Esmalte UV/led Charm Limit (14)", "precio": 1500, "stock": 1, "stockMin": 1, "gastoAcum": 1500, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1500, "precioUnidad": 1500, "total": 1500}]}, {"nombre": "Esmalte UV/led Charm Limit (13)", "precio": 1500, "stock": 1, "stockMin": 1, "gastoAcum": 1500, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1500, "precioUnidad": 1500, "total": 1500}]}, {"nombre": "Esmalte UV/led Charm Limit (03)", "precio": 1500, "stock": 1, "stockMin": 1, "gastoAcum": 1500, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1500, "precioUnidad": 1500, "total": 1500}]}, {"nombre": "Esmalte Eloise ANMAT (40)", "precio": 1500, "stock": 1, "stockMin": 1, "gastoAcum": 1500, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1500, "precioUnidad": 1500, "total": 1500}]}, {"nombre": "Esmalte Diamonds Gel Charm Limit", "precio": 2400, "stock": 3, "stockMin": 1, "gastoAcum": 7200, "recargas": [{"fecha": "09/03/2025", "cant": 3, "cajas": 3, "precio": 2400, "precioUnidad": 2400, "total": 7200}]}, {"nombre": "Esmalte blanco Charm Limit UV/led", "precio": 1500, "stock": 1, "stockMin": 1, "gastoAcum": 1500, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1500, "precioUnidad": 1500, "total": 1500}]}, {"nombre": "Compresas campo trabajo Ktex x50", "precio": 2700, "stock": 50, "stockMin": 10, "unidadxCaja": 50, "gastoAcum": 2700, "recargas": [{"fecha": "09/03/2025", "cant": 50, "cajas": 1, "precio": 2700, "precioUnidad": 54, "total": 2700}]}, {"nombre": "Clarificador 250ml Las Varano", "precio": 4500, "stock": 1, "stockMin": 1, "gastoAcum": 4500, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 4500, "precioUnidad": 4500, "total": 4500}]}, {"nombre": "Brocha para polvillo Charm Limit", "precio": 1900, "stock": 1, "stockMin": 1, "gastoAcum": 1900, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1900, "precioUnidad": 1900, "total": 1900}]}, {"nombre": "Base Coat Cherimoya 15ml", "precio": 8400, "stock": 2, "stockMin": 1, "gastoAcum": 14400, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 6000, "precioUnidad": 6000, "total": 6000}, {"fecha": "09/03/2026", "cant": 1, "cajas": 1, "precio": 8400, "precioUnidad": 8400, "total": 8400}], "unidadxCaja": 1}, {"nombre": "Base Blooming Charm Limit", "precio": 2300, "stock": 1, "stockMin": 1, "gastoAcum": 2300, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 2300, "precioUnidad": 2300, "total": 2300}]}, {"nombre": "Baldecito cuadrado BT055", "precio": 800, "stock": 2, "stockMin": 1, "gastoAcum": 1600, "recargas": [{"fecha": "09/03/2025", "cant": 2, "cajas": 2, "precio": 800, "precioUnidad": 800, "total": 1600}]}, {"nombre": "Aceite cutícula Cherimoya", "precio": 1800, "stock": 1, "stockMin": 1, "gastoAcum": 1800, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1800, "precioUnidad": 1800, "total": 1800}]}, {"nombre": "Ablandador de cutículas PINKY", "precio": 1100, "stock": 1, "stockMin": 1, "gastoAcum": 1100, "recargas": [{"fecha": "09/03/2025", "cant": 1, "cajas": 1, "precio": 1100, "precioUnidad": 1100, "total": 1100}]}, {"nombre": "Guantes T (M)", "precio": 8120, "stock": 100, "stockMin": 10, "unidadxCaja": 100, "gastoAcum": 8120, "recargas": [{"fecha": "25/02/2026", "cant": 100, "cajas": 1, "precio": 8120, "precioUnidad": 81.2, "total": 8120}]}, {"nombre": "Adhere", "precio": 1610, "stock": 2, "stockMin": 1, "unidadxCaja": 1, "gastoAcum": 3220, "recargas": [{"fecha": "25/03/2026", "cant": 2, "cajas": 2, "precio": 1610, "precioUnidad": 1610, "total": 3220}]}, {"nombre": "Lima 240/360", "precio": 600, "stock": 1, "stockMin": 1, "unidadxCaja": 1, "gastoAcum": 600, "recargas": [{"fecha": "25/02/2026", "cant": 1, "cajas": 1, "precio": 600, "precioUnidad": 600, "total": 600}]}, {"nombre": "Clarificador 125ml Las Varano Bajo", "precio": 4340, "stock": 1, "stockMin": 1, "unidadxCaja": 1, "gastoAcum": 4340, "recargas": [{"fecha": "25/02/2026", "cant": 1, "cajas": 1, "precio": 4340, "precioUnidad": 4340, "total": 4340}]}, {"nombre": "Cepillo x2", "precio": 560, "stock": 2, "stockMin": 1, "unidadxCaja": 2, "gastoAcum": 560, "recargas": [{"fecha": "25/02/2026", "cant": 2, "cajas": 1, "precio": 560, "precioUnidad": 280, "total": 560}]}, {"nombre": "Ultra Bond", "precio": 8400, "stock": 1, "stockMin": 1, "unidadxCaja": 1, "gastoAcum": 8400, "recargas": [{"fecha": "25/02/2026", "cant": 1, "cajas": 1, "precio": 8400, "precioUnidad": 8400, "total": 8400}]}, {"nombre": "Wipes", "precio": 3150, "stock": 1, "stockMin": 10, "unidadxCaja": 100, "gastoAcum": 3150, "recargas": [{"fecha": "25/02/2026", "cant": 1, "cajas": 1, "precio": 3150, "precioUnidad": 3150, "total": 3150}]}, {"nombre": "Aceite para Cuticula Pincel", "precio": 2380, "stock": 1, "stockMin": 1, "unidadxCaja": 1, "gastoAcum": 2380, "recargas": [{"fecha": "25/02/2026", "cant": 1, "cajas": 1, "precio": 2380, "precioUnidad": 2380, "total": 2380}]}, {"nombre": "Polygel", "precio": 9170, "stock": 1, "stockMin": 1, "unidadxCaja": 1, "gastoAcum": 9170, "recargas": [{"fecha": "25/02/2026", "cant": 1, "cajas": 1, "precio": 9170, "precioUnidad": 9170, "total": 9170}]}, {"nombre": "Moldes", "precio": 11340, "stock": 300, "stockMin": 10, "unidadxCaja": 300, "gastoAcum": 11340, "recargas": [{"fecha": "25/02/2026", "cant": 300, "cajas": 1, "precio": 11340, "precioUnidad": 37.8, "total": 11340}]}, {"nombre": "Pincel Liner", "precio": 2380, "stock": 1, "stockMin": 1, "unidadxCaja": 1, "gastoAcum": 2380, "recargas": [{"fecha": "25/02/2026", "cant": 1, "cajas": 1, "precio": 2380, "precioUnidad": 2380, "total": 2380}]}, {"nombre": "Set Pinceles", "precio": 2450, "stock": 15, "stockMin": 5, "unidadxCaja": 15, "gastoAcum": 2450, "recargas": [{"fecha": "25/02/2026", "cant": 15, "cajas": 1, "precio": 2450, "precioUnidad": 163.33333333333334, "total": 2450}]}, {"nombre": "Pincel para Polygel", "precio": 2100, "stock": 1, "stockMin": 1, "unidadxCaja": 1, "gastoAcum": 2100, "recargas": [{"fecha": "25/02/2026", "cant": 1, "cajas": 1, "precio": 2100, "precioUnidad": 2100, "total": 2100}]}, {"nombre": "Block Pulidor", "precio": 700, "stock": 1, "stockMin": 1, "unidadxCaja": 1, "gastoAcum": 700, "recargas": [{"fecha": "25/02/2026", "cant": 1, "cajas": 1, "precio": 700, "precioUnidad": 700, "total": 700}]}, {"nombre": "Esmalte Colores", "precio": 10080, "stock": 6, "stockMin": 1, "unidadxCaja": 6, "gastoAcum": 10080, "recargas": [{"fecha": "25/02/2026", "cant": 6, "cajas": 1, "precio": 10080, "precioUnidad": 1680, "total": 10080}]}, {"nombre": "Polvos", "precio": 5400, "stock": 6, "stockMin": 1, "unidadxCaja": 6, "gastoAcum": 5400, "recargas": [{"fecha": "25/02/2026", "cant": 6, "cajas": 1, "precio": 5400, "precioUnidad": 900, "total": 5400}]}];
+
+// Carga: localStorage tiene prioridad si existe, si no usa los datos base del archivo
+(function(){
+  // SIEMPRE arrancar desde los datos base del archivo
+  // El localStorage solo guarda cambios NUEVOS que el usuario haga desde ahora
+  var savedU = lsParse("unica_v2") || [];
+  var mapU = {};
+  savedU.forEach(function(x){ mapU[x.nombre] = x; });
+  invUnica = _UNICA_BASE.map(function(def){
+    return mapU[def.nombre] ? mapU[def.nombre] : JSON.parse(JSON.stringify(def));
+  });
+  // Items nuevos agregados por el usuario después
+  savedU.forEach(function(x){
+    var enBase = _UNICA_BASE.some(function(d){ return d.nombre === x.nombre; });
+    if(!enBase) invUnica.push(x);
+  });
+
+  var savedM = lsParse("mensual_v2") || [];
+  var mapM = {};
+  savedM.forEach(function(x){ mapM[x.nombre] = x; });
+  insMensual = _MENSUAL_BASE.map(function(def){
+    return mapM[def.nombre] ? mapM[def.nombre] : JSON.parse(JSON.stringify(def));
+  });
+  // Items nuevos agregados por el usuario después
+  savedM.forEach(function(x){
+    var enBase = _MENSUAL_BASE.some(function(d){ return d.nombre === x.nombre; });
+    if(!enBase) insMensual.push(x);
+  });
+}());
+
+var historial  = lsParse("historial")  || [{"fecha": "2026-03-05 02:16", "servicio": "Capping gel", "nombre": "rew", "precio": 13600, "costo": 0, "ganancia": 13600, "extras": [{"nombre": "Retirado", "precio": 1000, "cant": 1}, {"nombre": "Retirado otro salón", "precio": 2000, "cant": 1}, {"nombre": "Arreglo por uña", "precio": 300, "cant": 2}], "senia": 5000}, {"fecha": "2026-03-05 02:27", "servicio": "Capping gel", "nombre": "jjj", "precio": 13300, "costo": 0, "ganancia": 13300, "extras": [{"nombre": "Retirado", "precio": 1000, "cant": 1}, {"nombre": "Retirado otro salón", "precio": 2000, "cant": 1}, {"nombre": "Arreglo por uña", "precio": 300, "cant": 1}], "senia": 5000}];
+var turnos     = lsParse("turnos")     || [{"fecha": "2026-03-25", "hora": "17:37", "nombre": "GG", "servicio": "Capping gel", "precio": 11300, "senia": 5000, "extras": [{"nombre": "Retirado", "precio": 1000, "cant": 1}, {"nombre": "Arreglo por uña", "precio": 300, "cant": 1}], "realizado": false}, {"fecha": "2026-03-06", "hora": "02:26", "nombre": "jjj", "servicio": "Capping gel", "precio": 13300, "senia": 5000, "extras": [{"nombre": "Retirado", "precio": 1000, "cant": 1}, {"nombre": "Retirado otro salón", "precio": 2000, "cant": 1}, {"nombre": "Arreglo por uña", "precio": 300, "cant": 1}], "realizado": true}];
+var clientas   = (function(){ var v=lsParse("clientas"); return Array.isArray(v)?v:[]; })();
 var listaEspera= lsParse("listaEspera")|| {};
-var ganancia   = parseFloat(lsParse("ganancia"))||0;
-var negocio    = lsParse("negocio")    || {nombre:"Nail Studio 💅", sub:"Control del negocio"};
-// consumiblesSvc: [{nombre, cant, activo}] — insumos que se descuentan por servicio
+var ganancia   = parseFloat(lsParse("ganancia"))||26900;
+var negocio    = lsParse("negocio")    || {"nombre": "Nail Studio 💅", "sub": "Control del negocio"};
 var consumiblesSvc = lsParse("consumiblesSvc") || [];
 var statsAnio, stMes;
 (function(){var d=new Date();statsAnio=d.getFullYear();stMes=d.getMonth();}());
@@ -897,12 +1050,9 @@ var diaSelected= hoy();
 var calYear, calMonth;
 (function(){var d=new Date();calYear=d.getFullYear();calMonth=d.getMonth();}());
 
-if(!lsParse("unica"))   lsSave("unica",   UNICOS_DEF);
-if(!lsParse("mensual")) lsSave("mensual", MENSUALES_DEF);
-
 function guardar(){
   lsSave("preciosSvc",preciosSvc);lsSave("preciosExt",preciosExt);
-  lsSave("unica",invUnica);lsSave("mensual",insMensual);
+  lsSave("unica_v2",invUnica);lsSave("mensual_v2",insMensual);
   lsSave("historial",historial);lsSave("turnos",turnos);
   lsSave("clientas",clientas);lsSave("negocio",negocio);lsSave("galeriaFotos",galeriaFotos);lsSave("listaEspera",listaEspera);
   lsSave("ganancia",ganancia);lsSave("consumiblesSvc",consumiblesSvc);
@@ -1324,6 +1474,64 @@ function renderStats(){
   }
 }
 
+// ─── EXPORTAR / IMPORTAR DATOS COMPLETOS ────────────────
+function exportarDatos(){
+  var datos = {
+    version: 1,
+    fecha: new Date().toLocaleDateString('es-AR'),
+    unica:        invUnica,
+    mensual:      insMensual,
+    historial:    historial,
+    turnos:       turnos,
+    clientas:     clientas,
+    ganancia:     ganancia,
+    preciosSvc:   preciosSvc,
+    preciosExt:   preciosExt,
+    consumiblesSvc: consumiblesSvc,
+    negocio:      negocio,
+    listaEspera:  listaEspera
+  };
+  var json = JSON.stringify(datos, null, 2);
+  var blob = new Blob([json], {type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'nailstudio_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ Datos exportados. Guardá el archivo .json');
+}
+
+function importarDatos(input){
+  var file = input.files[0];
+  if(!file){ return; }
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      var datos = JSON.parse(e.target.result);
+      if(!datos.version){ showToast('❌ Archivo inválido'); return; }
+      if(!confirm('¿Importar datos? Esto reemplaza TODO lo que tenés ahora en esta app.')) return;
+      if(datos.unica)         { invUnica=datos.unica;           lsSave('unica',invUnica); }
+      if(datos.mensual)       { insMensual=datos.mensual;       lsSave('mensual',insMensual); }
+      if(datos.historial)     { historial=datos.historial;      lsSave('historial',historial); }
+      if(datos.turnos)        { turnos=datos.turnos;            lsSave('turnos',turnos); }
+      if(datos.clientas)      { clientas=datos.clientas;        lsSave('clientas',clientas); }
+      if(datos.ganancia!=null){ ganancia=datos.ganancia;        lsSave('ganancia',ganancia); }
+      if(datos.preciosSvc)    { preciosSvc=datos.preciosSvc;    lsSave('preciosSvc',preciosSvc); }
+      if(datos.preciosExt)    { preciosExt=datos.preciosExt;    lsSave('preciosExt',preciosExt); }
+      if(datos.consumiblesSvc){ consumiblesSvc=datos.consumiblesSvc; lsSave('consumiblesSvc',consumiblesSvc); }
+      if(datos.negocio)       { negocio=datos.negocio;          lsSave('negocio',negocio); }
+      if(datos.listaEspera)   { listaEspera=datos.listaEspera;  lsSave('listaEspera',listaEspera); }
+      mostrar();
+      showToast('✅ Datos importados correctamente');
+    } catch(err){
+      showToast('❌ Error al leer el archivo');
+    }
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
 // ─── EXPORTAR RESUMEN ────────────────────────────────────
 function exportarResumen(){
   var NML=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
@@ -1598,7 +1806,7 @@ function eliminarTurno(i){turnos.splice(i,1);guardar();mostrar();renderSemana();
 // ─── RENDER INICIO ───────────────────────────────────────
 function mostrar(){
   var tU=invUnica.reduce(function(s,i){return s+i.precio;},0);
-  var tM=insMensual.reduce(function(s,i){return s+i.precio;},0);
+  var tM=insMensual.reduce(function(s,i){return s+(i.gastoAcum||0);},0); // total real gastado en insumos
   var tI=tU+tM;var pct=tI>0?Math.min(100,Math.round(ganancia/tI*100)):0;var falta=Math.max(0,tI-ganancia);
   gs("statsRow").innerHTML=
     '<div class="stat-card"><div class="lbl">Invertido</div><div class="val">'+fmt(tI)+'</div></div>'+
@@ -1645,9 +1853,20 @@ function renderConsumibles(){
     return;
   }
 
+  // Filtro buscador consumibles
+  var busqEl=gs("buscadorConsumibles");
+  var busq=busqEl?(busqEl.value||"").toLowerCase().trim():"";
+  var listaFiltrada=busq?insMensual.filter(function(item){return item.nombre.toLowerCase().includes(busq);}):insMensual.slice();
+  listaFiltrada.sort(function(a,b){return a.nombre.localeCompare(b.nombre,"es");});
+
+  if(busq&&!listaFiltrada.length){
+    el.innerHTML='<div class="stock-no-results">🔍 Sin resultados para "<strong>'+busq+'"</strong></div>';
+    return;
+  }
+
   var html='';
-  insMensual.forEach(function(item,i){
-    // buscar si este insumo ya está en consumiblesSvc
+  listaFiltrada.forEach(function(item){
+    var i=insMensual.indexOf(item);
     var cfg=consumiblesSvc.find(function(c){return c.nombre===item.nombre;});
     if(!cfg){cfg={nombre:item.nombre,cant:1,activo:false};consumiblesSvc.push(cfg);}
     var stockActual=item.stock||0;
@@ -1664,7 +1883,7 @@ function renderConsumibles(){
         '<span class="consumible-unit">u · stock: <strong style="color:'+(stockBajo?'var(--danger)':'inherit')+'">'+stockActual+'</strong></span>'+
       '</div>';
   });
-  // Limpiar consumibles huérfanos (insumos eliminados)
+  // Limpiar consumibles huérfanos
   var nombresActuales=insMensual.map(function(x){return x.nombre;});
   consumiblesSvc=consumiblesSvc.filter(function(c){return nombresActuales.indexOf(c.nombre)>=0;});
 
@@ -1743,8 +1962,7 @@ function getTotalGastoRecargas(){
 
 function renderInversion(){
   var tU=invUnica.reduce(function(s,i){return s+i.precio;},0);
-  var tM=insMensual.reduce(function(s,i){return s+i.precio;},0);
-  var tGasto=getTotalGastoRecargas();
+  var tGasto=getTotalGastoRecargas(); // total real gastado en recargas de insumos
   gs("badgeUnica").textContent=invUnica.length;gs("badgeMensual").textContent=insMensual.length;
 
   // Panel gasto acumulado
@@ -1769,17 +1987,57 @@ function renderInversion(){
   });
   gs("totalUnicaRow").style.display=invUnica.length?"flex":"none";gs("totalUnica").textContent=fmt(tU);
 
-  // Alertas stock bajo
+  // Alertas stock bajo — siempre visibles
   var aEl=gs("alertasStock");aEl.innerHTML="";
   insMensual.forEach(function(item){
     if((item.stock||0)<=(item.stockMin||1))
       aEl.innerHTML+='<div class="warn-alert">⚠️ Stock bajo: <strong>'+item.nombre+'</strong> (quedan '+item.stock+')</div>';
   });
 
-  // Lista insumos mensuales
-  var lmEl=gs("listaMensual");
-  lmEl.innerHTML=insMensual.length?"":'<div class="empty-state"><span class="empty-icon">🧴</span>No hay insumos</div>';
-  insMensual.forEach(function(item,i){
+  // Filtro buscador
+  var busqEl=gs("buscadorStock");
+  var busq=busqEl?(busqEl.value||"").toLowerCase().trim():"";
+
+  var busqContainer=gs("listaMensualBusqueda");
+  var normalContainer=gs("seccionNormalMensual");
+
+  if(busq){
+    // Modo búsqueda: mostrar resultados arriba, ocultar sección normal
+    if(normalContainer) normalContainer.style.display="none";
+    if(busqContainer) busqContainer.style.display="block";
+    var filtrado=insMensual.filter(function(item){return item.nombre.toLowerCase().includes(busq);});
+    if(!filtrado.length){
+      busqContainer.innerHTML='<div class="stock-no-results">🔍 Sin resultados para "<strong>'+busq+'"</strong></div>';
+    } else {
+      busqContainer.innerHTML="";
+      filtrado.sort(function(a,b){return a.nombre.localeCompare(b.nombre,"es");});
+      filtrado.forEach(function(item){
+        var i=insMensual.indexOf(item);
+        busqContainer.innerHTML+=renderStockItem(item,i);
+      });
+    }
+  } else {
+    // Modo normal: ocultar resultados búsqueda, mostrar sección normal
+    if(busqContainer) busqContainer.innerHTML="";
+    if(normalContainer) normalContainer.style.display="block";
+
+    // Lista insumos mensuales
+    var lmEl=gs("listaMensual");
+    if(!insMensual.length){
+      lmEl.innerHTML='<div class="empty-state"><span class="empty-icon">🧴</span>No hay insumos</div>';
+    } else {
+      lmEl.innerHTML="";
+      var ordenados=insMensual.slice().sort(function(a,b){return a.nombre.localeCompare(b.nombre,"es");});
+      ordenados.forEach(function(item){
+        var i=insMensual.indexOf(item);
+        lmEl.innerHTML+=renderStockItem(item,i);
+      });
+    }
+  }
+  gs("totalMensualRow").style.display=insMensual.length?"flex":"none";gs("totalMensual").textContent=fmt(tGasto);
+}
+
+function renderStockItem(item,i){
     var s=item.stock||0,sm=item.stockMin||1;
     var pct2=Math.min(100,Math.round(s/Math.max(s,sm*2)*100));
     var cls=s<=0?"stock-danger":s<=sm?"stock-warn":"stock-ok";
@@ -1787,14 +2045,13 @@ function renderInversion(){
     var col=s<=0?"var(--danger)":s<=sm?"var(--warn)":"var(--success)";
     var gastoAcum=item.gastoAcum||0;
     var gastoChip=gastoAcum>0?'<span class="gasto-acum-chip">💸 Gastado: '+fmt(gastoAcum)+'</span>':'';
-    // Historial de últimas recargas con botón borrar
     var histHtml='';
     if(item.recargas&&item.recargas.length){
       var ultimas=item.recargas.slice(-4).reverse();
       var uxcDisp=item.unidadxCaja||1;
       histHtml='<div class="stock-recarga-hist">';
       ultimas.forEach(function(r,ri){
-        var realIdx=item.recargas.length-1-(ri); // index from end
+        var realIdx=item.recargas.length-1-ri;
         var cantLabel=uxcDisp>1?(r.cajas||1)+' caja'+(r.cajas>1?'s':'')+' ('+r.cant+'u)':'+'+r.cant+'u';
         histHtml+='<div class="recarga-row">'+
           '<span>📅 '+r.fecha+' · '+cantLabel+'</span>'+
@@ -1808,7 +2065,7 @@ function renderInversion(){
     }
     var uxc=item.unidadxCaja||1;
     var uxcBadge=uxc>1?'<span style="font-size:10px;background:#E8EAF6;color:#3949AB;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px;">📦 '+uxc+' u/caja</span>':'';
-    lmEl.innerHTML+='<div class="stock-item">'+
+    return '<div class="stock-item">'+
       '<div class="stock-header"><span class="stock-name">'+item.nombre+uxcBadge+'</span><span class="stock-badge '+cls+'">'+lbl+'</span></div>'+
       '<div class="stock-bar-bg"><div class="stock-bar-fill" style="width:'+pct2+'%;background:'+col+'"></div></div>'+
       '<div class="stock-meta"><span>Stock: <strong>'+s+'</strong> / Mín: '+sm+'</span><span class="stock-precio-actual">Precio actual: '+fmt(item.precio)+'</span></div>'+
@@ -1819,8 +2076,6 @@ function renderInversion(){
         '<button class="btn-sm" style="flex:1;background:#F5EEF1;color:var(--text)" onclick="bajarStock('+i+')">− Stock</button>'+
         '<button class="btn-sm btn-edit-stock" onclick="abrirEditStock('+i+')">✏️</button>'+
       '</div></div>';
-  });
-  gs("totalMensualRow").style.display=insMensual.length?"flex":"none";gs("totalMensual").textContent=fmt(tM);
 }
 
 // ── Restock modal ──
@@ -1979,20 +2234,54 @@ function agregarMensual(){
   var sa=parseInt(gs("stockActual").value)||1;
   var sm=parseInt(gs("stockMin").value)||1;
   var uxc=parseInt(gs("unidadxCajaMensual").value)||1;
+  var fechaInput=gs("fechaMensual").value; // YYYY-MM-DD
   if(!n||isNaN(p)||p<=0){showToast("⚠️ Completá nombre y precio");return;}
   var unidadesTotales=sa*uxc;
   var gastoInicial=p*sa;
-  var dp=hoy().split("-");var fechaHoy=dp[2]+"/"+dp[1]+"/"+dp[0];
+  // Formatear fecha: si tiene valor usar esa, si no usar hoy
+  var fechaFmt;
+  if(fechaInput){
+    var dp=fechaInput.split("-");
+    fechaFmt=dp[2]+"/"+dp[1]+"/"+dp[0];
+  } else {
+    var dp2=hoy().split("-");
+    fechaFmt=dp2[2]+"/"+dp2[1]+"/"+dp2[0];
+  }
   insMensual.push({
     nombre:n,precio:p,stock:unidadesTotales,stockMin:sm,
     unidadxCaja:uxc,gastoAcum:gastoInicial,
-    recargas:[{fecha:fechaHoy,cant:unidadesTotales,cajas:sa,precio:p,precioUnidad:p/uxc,total:gastoInicial}]
+    recargas:[{fecha:fechaFmt,cant:unidadesTotales,cajas:sa,precio:p,precioUnidad:p/uxc,total:gastoInicial}]
   });
-  gs("nombreMensual").value="";gs("precioMensual").value="";gs("stockActual").value="";gs("stockMin").value="";gs("unidadxCajaMensual").value="";
+  gs("nombreMensual").value="";gs("precioMensual").value="";gs("stockActual").value="";gs("stockMin").value="";gs("unidadxCajaMensual").value="";gs("fechaMensual").value="";
   guardar();mostrar();showToast("✅ Insumo agregado");
 }
 function eliminarMensual(i){insMensual.splice(i,1);guardar();mostrar();showToast("🗑 Eliminado");}
 function ajustarStock(i,d){insMensual[i].stock=Math.max(0,(insMensual[i].stock||0)+d);guardar();renderInversion();if(insMensual[i].stock<=(insMensual[i].stockMin||1))showToast("⚠️ Stock bajo: "+insMensual[i].nombre);}
+
+// ─── SECCIONES COLAPSABLES ───────────────────────────────
+var seccionesState = lsParse("seccionesState") || {unica: true, mensual: true};
+
+function toggleSeccion(id){
+  seccionesState[id] = !seccionesState[id];
+  lsSave("seccionesState", seccionesState);
+  aplicarEstadoSecciones();
+}
+
+function aplicarEstadoSecciones(){
+  ["unica","mensual"].forEach(function(id){
+    var sec = gs("sec"+id.charAt(0).toUpperCase()+id.slice(1));
+    var icon = gs("icon"+id.charAt(0).toUpperCase()+id.slice(1));
+    if(!sec||!icon) return;
+    var abierto = seccionesState[id] !== false;
+    if(abierto){
+      sec.classList.remove("closed");
+      icon.classList.add("open");
+    } else {
+      sec.classList.add("closed");
+      icon.classList.remove("open");
+    }
+  });
+}
 
 // ─── TABS ────────────────────────────────────────────────
 function showTab(name){
@@ -2003,6 +2292,11 @@ function showTab(name){
   if(name==="stats"){renderStats();}
   if(name==="agenda"){renderSemana();renderTurnos();}
   if(name==="clientas"){renderClientas();}
+  if(name==="inversion"){
+    var fEl=gs("fechaMensual");
+    if(fEl&&!fEl.value) fEl.value=hoy();
+    aplicarEstadoSecciones();
+  }
 }
 
 // ─── INIT ────────────────────────────────────────────────
@@ -2021,6 +2315,10 @@ window.addEventListener("load",function(){
     mostrar();renderHistorial();renderStats();renderSemana();renderTurnos();renderClientas();
     gs("precioServicio").value=preciosSvc[gs("tipoServicio").value]||0;
     calcTotal();
+    // Fecha de hoy por defecto en el formulario de insumos
+    var fEl=gs("fechaMensual");
+    if(fEl) fEl.value=hoy();
+    aplicarEstadoSecciones();
   }catch(e){console.error("Init error:",e);}
 
   setTimeout(hideSplash, 1800);
